@@ -65,6 +65,13 @@
 - Isolated Latin drug names and numeric strengths with `<bdi dir="auto">` for clean RTL rendering.
 - Added ARIA landmarks (`role="region"`, `role="navigation"`, `role="dialog"`), `#sr-announcer` live announcements, modal focus return, arrow-key navigation on Pharmacy cabinet pills, `@media (prefers-reduced-motion: reduce)`, and `@axe-core/playwright` verification (`tests/e2e/a11y.spec.ts`).
 
+## Step 7: Navigation & UX
+- **Shareable URLs:** `StateStore` encodes `floor`, `room`, and `mode` into `window.location.hash` via `history.replaceState`; `Hud` restores hash state on startup and provides a `#btn-copy-link` button.
+- **Unified Search:** `SearchBox` returns grouped results for Rooms, Medications (jumping into `L1.pharmacy.dispensing`, highlighting, and opening the drug inspect panel), and Equipment (flying to a room containing that equipment).
+- **Minimap Floor Tabs:** Added `L1`–`L5` tabs inside `Minimap` alongside clickable room footprints.
+- **Onboarding & Touch:** Added 3-step dismissible coach marks in `Onboarding.ts` (persisted via `vh3d.onboardingDone`, skipped under `?test=1`) plus 550ms touch long-press on the canvas to enter a selected room.
+
+
 
 
 
