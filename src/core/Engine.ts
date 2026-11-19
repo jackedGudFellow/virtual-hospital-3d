@@ -41,10 +41,23 @@ export class Engine {
     this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
     this.camera.position.set(8, 6, 10);
 
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
+    try {
+      const testCanvas = document.createElement('canvas');
+      const hasGl = Boolean(
+        window.WebGLRenderingContext &&
+          (testCanvas.getContext('webgl2') || testCanvas.getContext('webgl')),
+      );
+      if (!hasGl) {
+        throw new Error('WebGL is not supported or is disabled in this browser.');
+      }
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Unable to initialize 3D WebGL renderer: ${msg}`);
+    }
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(width, height);
     this.renderer.shadowMap.enabled = true;

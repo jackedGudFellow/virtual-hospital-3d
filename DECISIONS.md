@@ -31,5 +31,12 @@
 - Verified baseline `npm run typecheck`, `npm run build` (`dist/` = `0.72 MB`, JS = `736.36 kB` / gzip `187.41 kB`), and `npm run qa` (153 rooms across 5 floors, 120 drugs across 12 cabinets) without running `npm ci` over network because `node_modules` was already freshly installed from `package-lock.json`.
 - Interactive browser smoke checks are tracked honestly as `PENDING MANUAL / STEP 5 E2E` in `docs/SMOKE_TEST.md` until run in a live browser or automated with Playwright in Step 5.
 
+## Step 1: Startup Robustness & Page Basics
+- Removed `maximum-scale=1.0, user-scalable=no` from `index.html` viewport meta so pinch-zoom works on page chrome; added `touch-action: none` on `#canvas-container` to prevent unwanted browser scroll/zoom during 3D orbit gestures.
+- Added an inline SVG data-URI favicon (zero external network requests), `<noscript>` fallback, meta description, `theme-color`, and Open Graph tags.
+- Guarded `THREE.WebGLRenderer` creation in `Engine.ts` with a preflight `webgl2`/`webgl` context check and `try/catch`, plus `webglcontextlost`/`webglcontextrestored` handlers in `main.ts`.
+- Split `bootstrap()` into 5 async stages separated by `requestAnimationFrame` + `setTimeout(0)` (`nextFrame()`) with a 20-second startup watchdog so the progress bar visibly paints and never hangs silently.
+
+
 
 
