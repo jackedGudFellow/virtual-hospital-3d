@@ -1,0 +1,47 @@
+[
+  {
+    "id": "overview",
+    "name": "Hospital Overview",
+    "stops": [
+      { "title": "1/6 · Hospital Exterior (L1–L5 + NICU Wing)", "floorMode": "whole", "floorId": null, "roomId": null },
+      { "title": "2/6 · Main Lobby & Entrance (L1)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.main.lobby" },
+      { "title": "3/6 · Public Pharmacy & 120 Medications (L1)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.pharmacy.dispensing" },
+      { "title": "4/6 · Intensive Care Unit (L1)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.icu.main" },
+      { "title": "5/6 · NICU 8-Bay Open Ward (L2)", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.open-ward" },
+      { "title": "6/6 · Typical Inpatient Ward (L4)", "floorMode": "isolate", "floorId": "L4", "roomId": "L4.inpatient.double-1" }
+    ]
+  },
+  {
+    "id": "chemo-day",
+    "name": "A Chemotherapy Patient's Day",
+    "stops": [
+      { "title": "1/5 · Arrival at Main Lobby & Check-In", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.main.lobby" },
+      { "title": "2/5 · Chemo Sub-Reception & Quiet Waiting", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.chemo.waiting" },
+      { "title": "3/5 · Cytotoxic Drug Preparation (Negative-Pressure Isolators)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.chemo.cytotoxic-prep" },
+      { "title": "4/5 · Outpatient Chemotherapy Infusion Bay", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.chemo.bay" },
+      { "title": "5/5 · Supportive Care Pickup at Public Pharmacy", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.pharmacy.dispensing" }
+    ]
+  },
+  {
+    "id": "nicu-path",
+    "name": "A Newborn's Path Through NICU",
+    "stops": [
+      { "title": "1/5 · NICU Connection Corridor from Main Core (L2)", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.conn-corridor" },
+      { "title": "2/5 · Entry Air Lock & Infection Control", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.airlock-2" },
+      { "title": "3/5 · Central NICU Nurse Station (4 Workstations)", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.nurse-station" },
+      { "title": "4/5 · 8-Bay Neonatal Open Ward (Incubators & Ventilators)", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.open-ward" },
+      { "title": "5/5 · Breast-Feeding & Hygienic Milk Preparation Room", "floorMode": "isolate", "floorId": "L2", "roomId": "L2.nicu.milk-prep" }
+    ]
+  },
+  {
+    "id": "med-supply",
+    "name": "Medication: Storage to Patient",
+    "stops": [
+      { "title": "1/5 · Receiving & Bulk Storage (Cold Room & Safe)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.pharmacy.storage" },
+      { "title": "2/5 · Pass-Through Hatch to Cytotoxic Compounding", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.chemo.cytotoxic-prep" },
+      { "title": "3/5 · Dispensing Counter & Verification (L1 Pharmacy)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.pharmacy.dispensing" },
+      { "title": "4/5 · High-Acuity Critical Care Delivery (ICU)", "floorMode": "isolate", "floorId": "L1", "roomId": "L1.icu.main" },
+      { "title": "5/5 · Inpatient Ward Nursing Station & Bedside (L4)", "floorMode": "isolate", "floorId": "L4", "roomId": "L4.inpatient.nurse-station" }
+    ]
+  }
+]
