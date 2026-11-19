@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { EventBus } from '../core/Events';
+import { onLangChange, t } from '../core/I18n';
 import { createDrugMesh } from '../rooms/PharmacyDrugMesh';
 import { DrugSpec, PHARMACY_CABINETS } from '../rooms/PharmacyTypes';
 
@@ -25,6 +26,21 @@ export class PharmacyPanel {
     this.drugs = drugs;
     this.bus = bus;
     this.renderShell();
+    onLangChange(() => {
+      this.refreshToolbarLabels();
+      if (this.activeDrug) this.showDrug(this.activeDrug.id);
+    });
+  }
+
+  private refreshToolbarLabels(): void {
+    const title = this.root.querySelector('.pharmacy-toolbar-title');
+    if (title) title.textContent = t('pharmacyTitle');
+    const search = this.root.querySelector('#pharmacy-drug-search') as HTMLInputElement | null;
+    if (search) search.placeholder = t('pharmacySearch');
+    const disp = this.root.querySelector('#pharmacy-dispense-open');
+    if (disp) disp.textContent = t('dispenseRx');
+    const quiz = this.root.querySelector('#pharmacy-quiz-open');
+    if (quiz) quiz.textContent = t('quizMe');
   }
 
   private renderShell(): void {
@@ -34,23 +50,24 @@ export class PharmacyPanel {
     ).join('');
 
     this.root.innerHTML = `
-      <div class="pharmacy-toolbar hidden" id="pharmacy-toolbar">
+      <div class="pharmacy-toolbar hidden" id="pharmacy-toolbar" role="region" aria-label="Pharmacy inventory controls">
         <div class="pharmacy-toolbar-row">
-          <div class="pharmacy-toolbar-title">Pharmacy (120 Drugs)</div>
+          <div class="pharmacy-toolbar-title">${t('pharmacyTitle')}</div>
           <input
             type="search"
             class="search-input"
             id="pharmacy-drug-search"
-            placeholder="Search drug (e.g. insulin, morphine)..."
+            placeholder="${t('pharmacySearch')}"
+            aria-label="${t('pharmacySearch')}"
             autocomplete="off"
           />
-          <button type="button" class="hud-btn active" id="pharmacy-dispense-open">Dispense Rx</button>
-          <button type="button" class="hud-btn" id="pharmacy-quiz-open">Quiz Me</button>
+          <button type="button" class="hud-btn active" id="pharmacy-dispense-open">${t('dispenseRx')}</button>
+          <button type="button" class="hud-btn" id="pharmacy-quiz-open">${t('quizMe')}</button>
         </div>
-        <div class="pharmacy-cab-strip" aria-label="Jump to cabinet">${cabBtns}</div>
+        <div class="pharmacy-cab-strip" role="toolbar" aria-label="Pharmacy cabinets A to L">${cabBtns}</div>
       </div>
-      <div class="pharmacy-inspect hidden" id="pharmacy-inspect"></div>
-      <div class="pharmacy-modal hidden" id="pharmacy-modal"></div>
+      <div class="pharmacy-inspect hidden" id="pharmacy-inspect" role="region" aria-label="Medication inspector"></div>
+      <div class="pharmacy-modal hidden" id="pharmacy-modal" role="dialog" aria-modal="true" aria-label="Pharmacy dialog"></div>
     `;
 
     this.toolbarEl = this.root.querySelector('#pharmacy-toolbar') as HTMLElement;
@@ -70,12 +87,20 @@ export class PharmacyPanel {
       this.openQuizModal();
     });
 
-    for (const btn of this.root.querySelectorAll<HTMLButtonElement>('.cab-pill')) {
+    const cabButtons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.cab-pill'));
+    cabButtons.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
         const cabId = btn.dataset.cab;
         if (cabId) this.bus.emit('pharmacy:cabinet', { cabinetId: cabId });
       });
-    }
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const delta = e.key === 'ArrowRight' ? 1 : -1;
+          cabButtons[(idx + delta + cabButtons.length) % cabButtons.length]?.focus();
+        }
+      });
+    });
   }
 
   setVisible(visible: boolean): void {
@@ -98,29 +123,29 @@ export class PharmacyPanel {
     this.inspectEl.innerHTML = `
       <div class="info-panel-header">
         <span class="info-dept-badge" style="background:#d1fae5; color:#065f46; border-color:#059669">
-          Cab ${drug.cabinet} · Shelf ${drug.shelf} · Slot ${drug.slot}
+          <bdi>Cab ${drug.cabinet} · Shelf ${drug.shelf} · Slot ${drug.slot}</bdi>
         </span>
-        <button type="button" class="info-close-btn" id="drug-close-btn">✕</button>
+        <button type="button" class="info-close-btn" id="drug-close-btn" aria-label="${t('close')}">✕</button>
       </div>
       <div class="drug-preview-wrap">
-        <canvas width="240" height="130" id="drug-preview-canvas"></canvas>
-        <div class="drug-preview-hint">Drag to rotate 3D package</div>
+        <canvas width="240" height="130" id="drug-preview-canvas" aria-label="3D package preview"></canvas>
+        <div class="drug-preview-hint">${t('dragRotate')}</div>
       </div>
-      <h2 class="info-room-title">${drug.genericName}</h2>
-      <div class="info-room-meta"><strong>${drug.strength}</strong> · ${drug.form} · Schedule: <strong>${drug.schedule}</strong></div>
+      <h2 class="info-room-title"><bdi dir="auto">${drug.genericName}</bdi></h2>
+      <div class="info-room-meta"><strong><bdi>${drug.strength}</bdi></strong> · ${drug.form} · ${t('schedule')}: <strong>${drug.schedule}</strong></div>
       <div class="drug-fields">
-        <div><strong>Brands:</strong> ${drug.brandExamples.join(', ')}</div>
-        <div><strong>Class:</strong> ${drug.drugClass}</div>
-        <div><strong>Common uses:</strong> ${drug.commonUses}</div>
-        <div><strong>Storage:</strong> ${drug.storage}</div>
-        <div class="drug-warning"><strong>Key warnings:</strong> ${drug.keyWarnings}</div>
+        <div><strong>${t('brands')}:</strong> <bdi dir="auto">${drug.brandExamples.join(', ')}</bdi></div>
+        <div><strong>${t('drugClass')}:</strong> ${drug.drugClass}</div>
+        <div><strong>${t('commonUses')}:</strong> ${drug.commonUses}</div>
+        <div><strong>${t('storage')}:</strong> ${drug.storage}</div>
+        <div class="drug-warning"><strong>${t('keyWarnings')}:</strong> ${drug.keyWarnings}</div>
       </div>
       <div class="drug-nav-row">
-        <button type="button" class="hud-btn" id="drug-prev-btn">← Prev</button>
-        <span>${idx + 1} / ${cabDrugs.length}</span>
-        <button type="button" class="hud-btn" id="drug-next-btn">Next →</button>
+        <button type="button" class="hud-btn" id="drug-prev-btn">${t('prev')}</button>
+        <span><bdi>${idx + 1} / ${cabDrugs.length}</bdi></span>
+        <button type="button" class="hud-btn" id="drug-next-btn">${t('next')}</button>
       </div>
-      <div class="drug-disclaimer">Educational simulation. Not medical advice.</div>
+      <div class="drug-disclaimer">${t('disclaimer')}</div>
     `;
 
     this.inspectEl.querySelector('#drug-close-btn')?.addEventListener('click', () => this.closeInspect());

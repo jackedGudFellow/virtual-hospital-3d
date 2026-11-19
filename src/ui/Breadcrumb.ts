@@ -1,4 +1,5 @@
 import { EventBus } from '../core/Events';
+import { onLangChange, t } from '../core/I18n';
 import { AppMode } from '../core/StateStore';
 
 /**
@@ -7,16 +8,21 @@ import { AppMode } from '../core/StateStore';
 export class Breadcrumb {
   private el: HTMLElement;
   private bus: EventBus;
+  private lastArgs: [AppMode, string | null, string | null] = ['EXTERIOR', null, null];
 
   constructor(container: HTMLElement, bus: EventBus) {
     this.el = container;
     this.bus = bus;
+    this.el.setAttribute('role', 'navigation');
+    this.el.setAttribute('aria-label', 'Location breadcrumb');
+    onLangChange(() => this.update(...this.lastArgs));
     this.update('EXTERIOR', null, null);
   }
 
   update(mode: AppMode, floorId: string | null, roomName: string | null): void {
+    this.lastArgs = [mode, floorId, roomName];
     const parts: { label: string; action: 'exterior' | 'floor' | 'none' }[] = [
-      { label: 'Hospital', action: mode === 'EXTERIOR' ? 'none' : 'exterior' },
+      { label: t('hospital'), action: mode === 'EXTERIOR' ? 'none' : 'exterior' },
     ];
 
     if (floorId) {

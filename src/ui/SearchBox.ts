@@ -1,5 +1,6 @@
 import { EventBus } from '../core/Events';
 import { HospitalIndex } from '../core/HospitalIndex';
+import { onLangChange, t } from '../core/I18n';
 
 /**
  * Search box for finding any room or department across all floors and flying to it.
@@ -25,7 +26,7 @@ export class SearchBox {
           type="search"
           class="search-input"
           id="hospital-search-input"
-          placeholder="Search rooms (e.g. ICU, Pharmacy, NICU)..."
+          placeholder="${t('searchPlaceholder')}"
           aria-label="Search hospital rooms"
           autocomplete="off"
         />
@@ -38,6 +39,9 @@ export class SearchBox {
 
     this.input.addEventListener('input', () => this.updateResults());
     this.input.addEventListener('focus', () => this.updateResults());
+    onLangChange(() => {
+      this.input.placeholder = t('searchPlaceholder');
+    });
     document.addEventListener('click', (e) => {
       if (!this.el.contains(e.target as Node)) {
         this.resultsEl.classList.add('hidden');

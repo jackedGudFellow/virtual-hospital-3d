@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { EventBus } from '../core/Events';
 import { HospitalIndex } from '../core/HospitalIndex';
+import { onLangChange, t } from '../core/I18n';
 
 /**
  * Interactive 2D canvas minimap: click any room to fly straight to it,
@@ -20,16 +21,24 @@ export class Minimap {
     this.el = container;
     this.index = index;
     this.bus = bus;
+    this.el.setAttribute('role', 'region');
+    this.el.setAttribute('aria-label', 'Floor minimap');
     this.el.innerHTML = `
       <div class="minimap-header">
-        <span class="minimap-title" id="minimap-title">Floor L1</span>
-        <span class="minimap-sub">Click room to jump ●</span>
+        <span class="minimap-title" id="minimap-title">${t('minimapFloor')} L1</span>
+        <span class="minimap-sub" id="minimap-sub">${t('minimapSub')}</span>
       </div>
       <canvas width="180" height="150" class="minimap-canvas" id="minimap-canvas" title="Click any room to fly there"></canvas>
     `;
     this.canvas = this.el.querySelector('#minimap-canvas') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d')!;
     this.titleEl = this.el.querySelector('#minimap-title') as HTMLElement;
+
+    onLangChange(() => {
+      this.titleEl.textContent = `${t('minimapFloor')} ${this.activeFloorId}`;
+      const sub = this.el.querySelector('#minimap-sub');
+      if (sub) sub.textContent = t('minimapSub');
+    });
 
     this.canvas.addEventListener('click', (e) => this.handleClick(e));
   }
@@ -63,7 +72,7 @@ export class Minimap {
   setContext(floorId: string | null, roomId: string | null): void {
     this.activeFloorId = floorId ?? 'L1';
     this.activeRoomId = roomId;
-    this.titleEl.textContent = `Floor ${this.activeFloorId}`;
+    this.titleEl.textContent = `${t('minimapFloor')} ${this.activeFloorId}`;
   }
 
   update(cameraPos: THREE.Vector3, yaw: number): void {

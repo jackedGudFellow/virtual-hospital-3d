@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { EventBus } from '../core/Events';
 import { HospitalIndex } from '../core/HospitalIndex';
 import { RoomTypesMap } from '../core/HospitalTypes';
-import { LangCode, t } from '../core/I18n';
+import { getLang, onLangChange, setLang, t, tDept } from '../core/I18n';
 import { StateStore } from '../core/StateStore';
 import { DrugSpec } from '../rooms/PharmacyTypes';
 import { Breadcrumb } from './Breadcrumb';
@@ -59,7 +59,7 @@ export class Hud {
   private soundOn = false;
   private lowQuality = false;
   private highContrast = false;
-  private lang: LangCode = 'en';
+  private srAnnouncer!: HTMLElement;
 
   constructor(
     root: HTMLElement,
@@ -84,12 +84,12 @@ export class Hud {
   }
 
   private render(): void {
-    const legendItems = Object.values(this.index.data.departments)
+    const legendItems = Object.entries(this.index.data.departments)
       .map(
-        (d) => `
+        ([key, d]) => `
         <div class="hud-legend-item" title="${d.name}">
           <span class="hud-legend-swatch" style="background:${d.floorColor}; border-color:${d.accentColor}"></span>
-          <span>${d.name}</span>
+          <span data-dept-key="${key}">${tDept(key, d.name)}</span>
         </div>`,
       )
       .join('');
@@ -114,7 +114,7 @@ export class Hud {
           <div class="hud-brand hud-interactive">
             <span class="hud-brand-dot" aria-hidden="true"></span>
             <div>
-              <div class="hud-brand-title">${t(this.lang, 'brandTitle')}</div>
+              <div class="hud-brand-title">${t('brandTitle')}</div>
               <div class="hud-breadcrumb-inline" id="hud-breadcrumb"></div>
             </div>
           </div>
@@ -125,31 +125,32 @@ export class Hud {
         </div>
 
         <div class="hud-controls hud-interactive">
-          <button type="button" class="hud-btn" id="btn-tour" aria-label="Start guided hospital tour">${t(this.lang, 'tour')}</button>
+          <button type="button" class="hud-btn" id="btn-tour">${t('tour')}</button>
           <div class="settings-wrap">
-            <button type="button" class="hud-btn" id="btn-settings" aria-label="Open view and accessibility settings">Settings ▾</button>
+            <button type="button" class="hud-btn" id="btn-settings" aria-haspopup="true" aria-expanded="false">${t('settings')}</button>
             <div class="settings-popover hidden" id="settings-popover">
-              <button type="button" class="hud-btn ${ceilOn ? 'active' : ''}" id="btn-toggle-ceilings">Ceilings: ${ceilOn ? 'On' : 'Off'}</button>
-              <button type="button" class="hud-btn" id="btn-toggle-topdown">View: 3D Orbit</button>
-              <button type="button" class="hud-btn active" id="btn-toggle-labels">Labels: On</button>
-              <button type="button" class="hud-btn" id="btn-daynight">${t(this.lang, 'day')}</button>
-              <button type="button" class="hud-btn" id="btn-sound">${t(this.lang, 'soundOff')}</button>
-              <button type="button" class="hud-btn" id="btn-quality">${t(this.lang, 'qualityHigh')}</button>
-              <button type="button" class="hud-btn" id="btn-contrast">${t(this.lang, 'contrast')}</button>
-              <button type="button" class="hud-btn" id="btn-lang">${t(this.lang, 'langBtn')}</button>
+              <button type="button" class="hud-btn ${ceilOn ? 'active' : ''}" id="btn-toggle-ceilings">${t(ceilOn ? 'ceilingsOn' : 'ceilingsOff')}</button>
+              <button type="button" class="hud-btn" id="btn-toggle-topdown">${t('viewOrbit')}</button>
+              <button type="button" class="hud-btn active" id="btn-toggle-labels">${t('labelsOn')}</button>
+              <button type="button" class="hud-btn" id="btn-daynight">${t('day')}</button>
+              <button type="button" class="hud-btn" id="btn-sound">${t('soundOff')}</button>
+              <button type="button" class="hud-btn" id="btn-quality">${t('qualityHigh')}</button>
+              <button type="button" class="hud-btn" id="btn-contrast">${t('contrast')}</button>
+              <button type="button" class="hud-btn" id="btn-lang">${t('langBtn')}</button>
             </div>
           </div>
           <button type="button" class="hud-btn" id="btn-help" aria-label="How to explore help guide">?</button>
-          <div class="hud-status-pill" id="hud-mode-pill">Mode: ${this.store.getState().mode}</div>
+          <div class="hud-status-pill" id="hud-mode-pill">${t('modePrefix')}: ${this.store.getState().mode}</div>
         </div>
       </div>
 
-      <div class="elevator-rail hud-interactive" aria-label="Floor switcher">
-        <button type="button" class="hud-btn floor-btn rail-btn active" data-floor-mode="whole">All</button>
-        <button type="button" class="hud-btn floor-btn rail-btn" data-floor-mode="exploded">Split</button>
+      <div class="elevator-rail hud-interactive" role="navigation" aria-label="Floor switcher">
+        <button type="button" class="hud-btn floor-btn rail-btn active" data-floor-mode="whole">${t('whole')}</button>
+        <button type="button" class="hud-btn floor-btn rail-btn" data-floor-mode="exploded">${t('exploded')}</button>
         <div class="rail-divider"></div>
         ${floorButtons}
       </div>
+      <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
       <div class="info-panel hud-interactive hidden" id="hud-info-panel"></div>
       <div class="hud-interactive" id="hud-pharmacy-root"></div>
@@ -187,7 +188,7 @@ export class Hud {
       <div class="touch-joystick hud-interactive hidden" id="hud-joystick"></div>
       <div class="tour-banner hud-interactive hidden" id="tour-banner" role="status" aria-live="polite">
         <span id="tour-step-title">Guided Tour</span>
-        <button type="button" class="hud-btn" id="tour-skip-btn" aria-label="Skip guided tour">Skip Tour</button>
+        <button type="button" class="hud-btn" id="tour-skip-btn">${t('skipTour')}</button>
       </div>
       <div class="hover-tooltip hidden" id="hover-tooltip"></div>
 
@@ -209,6 +210,7 @@ export class Hud {
     this.floorBtns = Array.from(this.root.querySelectorAll('.floor-btn'));
     this.tourBanner = this.root.querySelector('#tour-banner') as HTMLElement;
     this.tourTitleEl = this.root.querySelector('#tour-step-title') as HTMLElement;
+    this.srAnnouncer = this.root.querySelector('#sr-announcer') as HTMLElement;
   }
 
   private initSubModules(onJoystick: (x: number, y: number) => void): void {
@@ -337,7 +339,7 @@ export class Hud {
     const dnBtn = this.root.querySelector('#btn-daynight') as HTMLButtonElement;
     dnBtn?.addEventListener('click', () => {
       this.isNight = !this.isNight;
-      dnBtn.textContent = t(this.lang, this.isNight ? 'night' : 'day');
+      dnBtn.textContent = t(this.isNight ? 'night' : 'day');
       dnBtn.classList.toggle('active', this.isNight);
       this.bus.emit('ui:daynight', { night: this.isNight });
     });
@@ -345,7 +347,7 @@ export class Hud {
     const sndBtn = this.root.querySelector('#btn-sound') as HTMLButtonElement;
     sndBtn?.addEventListener('click', () => {
       this.soundOn = !this.soundOn;
-      sndBtn.textContent = t(this.lang, this.soundOn ? 'soundOn' : 'soundOff');
+      sndBtn.textContent = t(this.soundOn ? 'soundOn' : 'soundOff');
       sndBtn.classList.toggle('active', this.soundOn);
       this.bus.emit('ui:sound', { enabled: this.soundOn });
     });
@@ -354,7 +356,7 @@ export class Hud {
     const syncQualityBtn = (low: boolean): void => {
       this.lowQuality = low;
       if (!qualBtn) return;
-      qualBtn.textContent = t(this.lang, low ? 'qualityLow' : 'qualityHigh');
+      qualBtn.textContent = t(low ? 'qualityLow' : 'qualityHigh');
       qualBtn.classList.toggle('active', low);
     };
     qualBtn?.addEventListener('click', () => {
@@ -372,37 +374,55 @@ export class Hud {
     });
 
     const langBtn = this.root.querySelector('#btn-lang') as HTMLButtonElement;
-    langBtn?.addEventListener('click', () => {
-      this.lang = this.lang === 'en' ? 'ar' : 'en';
-      document.documentElement.dir = this.lang === 'ar' ? 'rtl' : 'ltr';
-      document.documentElement.lang = this.lang;
+    const applyLangToHud = (): void => {
       const titleEl = this.root.querySelector('.hud-brand-title');
-      if (titleEl) titleEl.textContent = t(this.lang, 'brandTitle');
+      if (titleEl) titleEl.textContent = t('brandTitle');
       const tourBtn = this.root.querySelector('#btn-tour');
-      if (tourBtn) tourBtn.textContent = t(this.lang, 'tour');
+      if (tourBtn) tourBtn.textContent = t('tour');
+      const skipBtn = this.root.querySelector('#tour-skip-btn');
+      if (skipBtn) skipBtn.textContent = t('skipTour');
       const setBtn = this.root.querySelector('#btn-settings');
-      if (setBtn) setBtn.textContent = t(this.lang, 'settings');
+      if (setBtn) setBtn.textContent = t('settings');
       const legBtn = this.root.querySelector('#btn-toggle-legend');
-      if (legBtn) legBtn.textContent = t(this.lang, 'departments');
+      if (legBtn) legBtn.textContent = t('departments');
       const wholeBtn = this.root.querySelector('[data-floor-mode="whole"]');
-      if (wholeBtn) wholeBtn.textContent = t(this.lang, 'whole');
+      if (wholeBtn) wholeBtn.textContent = t('whole');
       const splitBtn = this.root.querySelector('[data-floor-mode="exploded"]');
-      if (splitBtn) splitBtn.textContent = t(this.lang, 'exploded');
+      if (splitBtn) splitBtn.textContent = t('exploded');
+      this.ceilBtn.textContent = t(this.store.getState().ceilingsVisible ? 'ceilingsOn' : 'ceilingsOff');
+      this.topDownBtn.textContent = t(this.isTopDown ? 'viewTopDown' : 'viewOrbit');
+      this.labelsBtn.textContent = t(this.labelsVisible ? 'labelsOn' : 'labelsOff');
+      if (dnBtn) dnBtn.textContent = t(this.isNight ? 'night' : 'day');
+      if (sndBtn) sndBtn.textContent = t(this.soundOn ? 'soundOn' : 'soundOff');
+      if (qualBtn) qualBtn.textContent = t(this.lowQuality ? 'qualityLow' : 'qualityHigh');
+      if (hcBtn) hcBtn.textContent = t('contrast');
+      if (langBtn) langBtn.textContent = t('langBtn');
       const qKeys = ['qLobby', 'qPharmacy', 'qIcu', 'qSurgery', 'qChemo', 'qNicu'];
       this.root.querySelectorAll('.quick-chip').forEach((el, idx) => {
-        if (qKeys[idx]) el.textContent = t(this.lang, qKeys[idx]);
+        if (qKeys[idx]) el.textContent = t(qKeys[idx]);
       });
-      const searchIn = this.root.querySelector('#hospital-search-input') as HTMLInputElement | null;
-      if (searchIn) searchIn.placeholder = t(this.lang, 'searchPlaceholder');
-      langBtn.textContent = t(this.lang, 'langBtn');
-    });
+      this.root.querySelectorAll<HTMLElement>('[data-dept-key]').forEach((el) => {
+        const key = el.dataset.deptKey;
+        if (key) el.textContent = tDept(key, el.textContent ?? key);
+      });
+      this.modeEl.textContent = `${t('modePrefix')}: ${this.store.getState().mode}`;
+    };
 
-    const helpModal = this.root.querySelector('#hud-help-modal') as HTMLElement;
-    this.root.querySelector('#btn-help')?.addEventListener('click', () => {
-      helpModal.classList.remove('hidden');
+    langBtn?.addEventListener('click', () => {
+      setLang(getLang() === 'en' ? 'ar' : 'en');
     });
-    this.root.querySelector('#help-close-btn')?.addEventListener('click', () => {
+    onLangChange(applyLangToHud);
+
+    const helpBtn = this.root.querySelector('#btn-help') as HTMLButtonElement | null;
+    const helpModal = this.root.querySelector('#hud-help-modal') as HTMLElement;
+    const helpClose = this.root.querySelector('#help-close-btn') as HTMLButtonElement | null;
+    helpBtn?.addEventListener('click', () => {
+      helpModal.classList.remove('hidden');
+      helpClose?.focus();
+    });
+    helpClose?.addEventListener('click', () => {
       helpModal.classList.add('hidden');
+      helpBtn?.focus();
     });
 
     window.addEventListener('keydown', this.handleKeyDown);
@@ -410,8 +430,8 @@ export class Hud {
 
   private syncFromState(): void {
     const s = this.store.getState();
-    this.modeEl.textContent = `Mode: ${s.mode}`;
-    this.ceilBtn.textContent = `Ceilings: ${s.ceilingsVisible ? 'On' : 'Off'}`;
+    this.modeEl.textContent = `${t('modePrefix')}: ${s.mode}`;
+    this.ceilBtn.textContent = t(s.ceilingsVisible ? 'ceilingsOn' : 'ceilingsOff');
     this.ceilBtn.classList.toggle('active', s.ceilingsVisible);
 
     const indexedRoom = s.activeRoom ? this.index.rooms.get(s.activeRoom) ?? null : null;
@@ -421,6 +441,10 @@ export class Hud {
     this.pharmacyPanel.setVisible(s.mode === 'ROOM' && s.activeRoom === 'L1.pharmacy.dispensing');
     if (s.mode === 'ROOM') {
       this.tooltipEl.classList.add('hidden');
+    }
+    if (this.srAnnouncer) {
+      const target = indexedRoom ? `${indexedRoom.floor.id} ${indexedRoom.room.name}` : s.activeFloor ?? t('hospital');
+      this.srAnnouncer.textContent = `${s.mode}: ${target}`;
     }
   }
 
