@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { setWindowNightGlow } from './RoomBuilder';
 
 /**
  * Clinical, calm daylight lighting rig for the virtual hospital scene.
@@ -38,6 +39,7 @@ export class Lighting {
   }
 
   setNightMode(night: boolean, scene: THREE.Scene): void {
+    setWindowNightGlow(night);
     if (night) {
       scene.background = new THREE.Color(0x0f172a);
       scene.fog = new THREE.Fog(0x0f172a, 75, 220);

@@ -98,6 +98,7 @@ export class Picker {
     drugId?: string;
     cabinetId?: string;
     pharmacyAction?: string;
+    floorPoint?: THREE.Vector3;
   } | null {
     const rect = this.domElement.getBoundingClientRect();
     this.pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
@@ -113,6 +114,9 @@ export class Picker {
       if (typeof ud.cabinetId === 'string') return { cabinetId: ud.cabinetId };
       if (typeof ud.itemId === 'string' && typeof ud.equipmentType === 'string') {
         return { itemId: ud.itemId, equipmentType: ud.equipmentType };
+      }
+      if (ud.isFloor) {
+        return { floorPoint: hit.point.clone() };
       }
     }
     return null;
@@ -152,6 +156,14 @@ export class Picker {
       }
       if (hit?.cabinetId) {
         this.bus.emit('pharmacy:cabinet', { cabinetId: hit.cabinetId });
+        return;
+      }
+      if (hit?.floorPoint) {
+        this.bus.emit('walk:goto', {
+          x: hit.floorPoint.x,
+          y: hit.floorPoint.y,
+          z: hit.floorPoint.z,
+        });
         return;
       }
       this.bus.emit('item:select', {

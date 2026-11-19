@@ -45,6 +45,7 @@ export class PharmacyPanel {
             autocomplete="off"
           />
           <button type="button" class="hud-btn active" id="pharmacy-dispense-open">Dispense Rx</button>
+          <button type="button" class="hud-btn" id="pharmacy-quiz-open">Quiz Me</button>
         </div>
         <div class="pharmacy-cab-strip" aria-label="Jump to cabinet">${cabBtns}</div>
       </div>
@@ -63,6 +64,10 @@ export class PharmacyPanel {
 
     this.root.querySelector('#pharmacy-dispense-open')?.addEventListener('click', () => {
       this.openDispenseModal();
+    });
+
+    this.root.querySelector('#pharmacy-quiz-open')?.addEventListener('click', () => {
+      this.openQuizModal();
     });
 
     for (const btn of this.root.querySelectorAll<HTMLButtonElement>('.cab-pill')) {
@@ -240,6 +245,62 @@ export class PharmacyPanel {
       `;
     });
 
+    this.modalEl.querySelector('#modal-cancel-btn')?.addEventListener('click', () => this.closeModal());
+  }
+
+  openQuizModal(score = 0, total = 0): void {
+    const target = this.drugs[Math.floor(Math.random() * this.drugs.length)];
+    const correctCab = PHARMACY_CABINETS.find((c) => c.id === target.cabinet)!;
+    const distractors = PHARMACY_CABINETS.filter((c) => c.id !== target.cabinet)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    const options = [correctCab, ...distractors].sort(() => Math.random() - 0.5);
+
+    this.modalEl.classList.remove('hidden');
+    this.modalEl.innerHTML = `
+      <div class="pharmacy-modal-card">
+        <h3>Pharmacy Study Quiz · Score: ${score}/${total}</h3>
+        <p style="font-size:13px; margin:0 0 10px 0;">
+          Which cabinet stores <strong>${target.genericName}</strong> (${target.strength}, ${target.form})?
+        </p>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+          ${options
+            .map(
+              (c) =>
+                `<button type="button" class="hud-btn quiz-opt" data-cab="${c.id}">Cabinet ${c.id} — ${c.title}</button>`,
+            )
+            .join('')}
+        </div>
+        <div id="quiz-feedback" style="font-size:12px; min-height:20px; margin-bottom:8px;"></div>
+        <div class="pharmacy-modal-actions">
+          <button type="button" class="hud-btn active" id="quiz-next-btn">Next Question</button>
+          <button type="button" class="hud-btn" id="modal-cancel-btn">Close</button>
+        </div>
+        <div class="drug-disclaimer">Educational simulation. Not medical advice.</div>
+      </div>
+    `;
+
+    let answered = false;
+    let nextScore = score;
+    const fb = this.modalEl.querySelector('#quiz-feedback') as HTMLElement;
+
+    for (const btn of this.modalEl.querySelectorAll<HTMLButtonElement>('.quiz-opt')) {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const ok = btn.dataset.cab === correctCab.id;
+        if (ok) nextScore += 1;
+        fb.style.color = ok ? '#059669' : '#dc2626';
+        fb.innerHTML = ok
+          ? `✓ Correct! <strong>${target.drugClass}</strong> — stored in Cabinet ${correctCab.id}.`
+          : `✕ Not quite. Stored in <strong>Cabinet ${correctCab.id} (${correctCab.title})</strong>.`;
+        this.bus.emit('pharmacy:cabinet', { cabinetId: correctCab.id });
+      });
+    }
+
+    this.modalEl.querySelector('#quiz-next-btn')?.addEventListener('click', () => {
+      this.openQuizModal(nextScore, answered ? total + 1 : total);
+    });
     this.modalEl.querySelector('#modal-cancel-btn')?.addEventListener('click', () => this.closeModal());
   }
 

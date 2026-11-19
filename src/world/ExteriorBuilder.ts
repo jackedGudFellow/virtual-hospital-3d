@@ -122,6 +122,45 @@ export class ExteriorBuilder {
       yard.add(crown);
     }
 
+    // Colorful courtyard flower beds
+    const flowerColors = [0xf43f5e, 0xf59e0b, 0xa855f7, 0xec4899];
+    for (let i = 0; i < 8; i += 1) {
+      const fx = 22 + (i % 4) * 2.0;
+      const fz = i < 4 ? 3.8 : 12.2;
+      const flower = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.32, 0),
+        new THREE.MeshStandardMaterial({ color: flowerColors[i % flowerColors.length], roughness: 0.7 }),
+      );
+      flower.position.set(fx, 0.55, fz);
+      yard.add(flower);
+    }
+
+    // Exterior landscaped lawn beds & South entrance driveway plaza
+    const lawnMat = new THREE.MeshStandardMaterial({ color: 0x86efac, roughness: 0.92 });
+    const plazaMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.8 });
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 });
+
+    const southLawnLeft = new THREE.Mesh(new THREE.BoxGeometry(24, 0.08, 9), lawnMat);
+    southLawnLeft.position.set(10, 0.02, 65.5);
+    const southLawnRight = new THREE.Mesh(new THREE.BoxGeometry(24, 0.08, 9), lawnMat);
+    southLawnRight.position.set(52, 0.02, 65.5);
+    const plaza = new THREE.Mesh(new THREE.BoxGeometry(20, 0.09, 10), plazaMat);
+    plaza.position.set(31, 0.03, 65.0);
+    const driveway = new THREE.Mesh(new THREE.BoxGeometry(96, 0.05, 6.5), roadMat);
+    driveway.position.set(34, 0.01, 73.5);
+    yard.add(southLawnLeft, southLawnRight, plaza, driveway);
+
+    // Perimeter trees along entrance plaza
+    for (const [tx, tz] of [[18, 63], [44, 63], [6, 65], [56, 65], [-5, 30], [-5, 48]]) {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 2.2, 8), trunkMat);
+      trunk.position.set(tx, 1.1, tz);
+      trunk.castShadow = true;
+      const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5, 1), foliageMat);
+      crown.position.set(tx, 2.9, tz);
+      crown.castShadow = true;
+      yard.add(trunk, crown);
+    }
+
     l1Group.add(yard);
   }
 
@@ -135,6 +174,21 @@ export class ExteriorBuilder {
     canopy.position.set(31, 3.6, 61.8);
     canopy.castShadow = true;
     facade.add(canopy);
+
+    // Glowing red Hospital Cross emblem on entrance canopy & rooftop
+    const crossMat = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xef4444,
+      emissiveIntensity: 0.45,
+      roughness: 0.3,
+    });
+    for (const cy of [4.3, totalH + 1.8]) {
+      const vBar = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.6, 0.2), crossMat);
+      vBar.position.set(31, cy, cy < 10 ? 63.55 : 60.1);
+      const hBar = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 0.2), crossMat);
+      hBar.position.set(31, cy, cy < 10 ? 63.55 : 60.1);
+      facade.add(vBar, hBar);
+    }
 
     for (const px of [25.6, 36.4]) {
       const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 3.6, 12), metalMat);

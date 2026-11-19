@@ -162,7 +162,8 @@ export class Hud {
             <li><strong>Quick Jump & Minimap:</strong> Use the top chips or click any room on the bottom-left minimap to fly straight there.</li>
             <li><strong>Inspect & Walk:</strong> Click a room for details; double-click or click <em>Enter Room</em> to orbit inside or toggle <em>Walk Mode (WASD)</em> to stroll through doors.</li>
             <li><strong>Pharmacy (L1):</strong> Jump to Pharmacy, click cabinets <em>A–L</em> or the Dispensing Window, and inspect 120 real medications.</li>
-            <li><strong>Shortcuts:</strong> <em>Esc</em> (step back) · <em>~</em> (FPS stats).</li>
+            <li><strong>Shortcuts:</strong> <em>1–5</em> (Floors L1–L5) · <em>0</em> (All) · <em>E</em> (Split) · <em>P</em> (Pharmacy) · <em>T</em> (Tour) · <em>Esc</em> (Back) · <em>~</em> (FPS).</li>
+            <li><strong>Walk Mode:</strong> Click any open floor spot to glide there, or use <em>WASD</em> + drag to look.</li>
           </ul>
           <div class="pharmacy-modal-actions">
             <button type="button" class="hud-btn active" id="help-close-btn">Got it</button>
@@ -371,6 +372,22 @@ export class Hud {
       document.documentElement.lang = this.lang;
       const titleEl = this.root.querySelector('.hud-brand-title');
       if (titleEl) titleEl.textContent = t(this.lang, 'brandTitle');
+      const tourBtn = this.root.querySelector('#btn-tour');
+      if (tourBtn) tourBtn.textContent = t(this.lang, 'tour');
+      const setBtn = this.root.querySelector('#btn-settings');
+      if (setBtn) setBtn.textContent = t(this.lang, 'settings');
+      const legBtn = this.root.querySelector('#btn-toggle-legend');
+      if (legBtn) legBtn.textContent = t(this.lang, 'departments');
+      const wholeBtn = this.root.querySelector('[data-floor-mode="whole"]');
+      if (wholeBtn) wholeBtn.textContent = t(this.lang, 'whole');
+      const splitBtn = this.root.querySelector('[data-floor-mode="exploded"]');
+      if (splitBtn) splitBtn.textContent = t(this.lang, 'exploded');
+      const qKeys = ['qLobby', 'qPharmacy', 'qIcu', 'qSurgery', 'qChemo', 'qNicu'];
+      this.root.querySelectorAll('.quick-chip').forEach((el, idx) => {
+        if (qKeys[idx]) el.textContent = t(this.lang, qKeys[idx]);
+      });
+      const searchIn = this.root.querySelector('#hospital-search-input') as HTMLInputElement | null;
+      if (searchIn) searchIn.placeholder = t(this.lang, 'searchPlaceholder');
       langBtn.textContent = t(this.lang, 'langBtn');
     });
 
@@ -410,10 +427,21 @@ export class Hud {
   }
 
   private handleKeyDown = (e: KeyboardEvent): void => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
     if (e.key === '~' || e.key === '`' || e.code === 'Backquote') {
       this.store.toggleDebugOverlay();
     } else if (e.key === 'Escape') {
       this.bus.emit('nav:up', {});
+    } else if (e.key >= '1' && e.key <= '5') {
+      this.bus.emit('floor:view', { viewMode: 'isolate', floorId: `L${e.key}` });
+    } else if (e.key === '0') {
+      this.bus.emit('floor:view', { viewMode: 'whole', floorId: null });
+    } else if (e.key.toLowerCase() === 'e') {
+      this.bus.emit('floor:view', { viewMode: 'exploded', floorId: null });
+    } else if (e.key.toLowerCase() === 'p') {
+      this.bus.emit('room:enter', { roomId: 'L1.pharmacy.dispensing' });
+    } else if (e.key.toLowerCase() === 't') {
+      this.bus.emit('tour:start', {});
     }
   };
 

@@ -4,7 +4,6 @@ import { DepartmentSpec, RoomSpec, WallSide } from '../core/HospitalTypes';
 
 export interface WorldOpening {
   axis: 'X' | 'Z';
-  /** Coordinate perpendicular to the wall (z for N/S walls, x for E/W walls) */
   lineCoord: number;
   start: number;
   end: number;
@@ -31,6 +30,12 @@ const sharedWallMat = new THREE.MeshStandardMaterial({
   metalness: 0.04,
 });
 
+const sharedFrameMat = new THREE.MeshStandardMaterial({
+  color: 0x334155,
+  roughness: 0.45,
+  metalness: 0.35,
+});
+
 const sharedCeilingMat = new THREE.MeshStandardMaterial({
   color: 0xf1f5f9,
   roughness: 0.9,
@@ -38,18 +43,71 @@ const sharedCeilingMat = new THREE.MeshStandardMaterial({
   side: THREE.DoubleSide,
 });
 
-const sharedGlassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xbae6fd,
+const sharedGlassMat = new THREE.MeshStandardMaterial({
+  color: 0x7dd3fc,
+  emissive: 0x000000,
+  emissiveIntensity: 0,
   transparent: true,
-  opacity: 0.35,
-  roughness: 0.1,
-  metalness: 0.1,
+  opacity: 0.42,
+  roughness: 0.12,
+  metalness: 0.15,
   depthWrite: false,
 });
 
-/**
- * Extracts world-space openings for a room's own declared doors and windows.
- */
+const floorTexCache = new Map<string, THREE.CanvasTexture>();
+
+function getFloorTileTexture(hexColor: string): THREE.CanvasTexture {
+  const cached = floorTexCache.get(hexColor);
+  if (cached) return cached;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.fillStyle = hexColor;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Subtle checkerboard tonal variation + clinical tile grout lines
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+  for (let y = 0; y < 4; y += 1) {
+    for (let x = 0; x < 4; x += 1) {
+      if ((x + y) % 2 === 0) ctx.fillRect(x * 64, y * 64, 64, 64);
+    }
+  }
+  ctx.strokeStyle = 'rgba(15, 42, 67, 0.09)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i <= 256; i += 64) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, 256);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(256, i);
+    ctx.stroke();
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  floorTexCache.set(hexColor, tex);
+  return tex;
+}
+
+export function setWindowNightGlow(night: boolean): void {
+  if (night) {
+    sharedGlassMat.emissive.setHex(0xfef08a);
+    sharedGlassMat.emissiveIntensity = 0.65;
+    sharedGlassMat.opacity = 0.72;
+  } else {
+    sharedGlassMat.emissive.setHex(0x000000);
+    sharedGlassMat.emissiveIntensity = 0;
+    sharedGlassMat.opacity = 0.42;
+  }
+}
+
 export function collectRoomOpenings(room: RoomSpec): WorldOpening[] {
   const openings: WorldOpening[] = [];
   const { x, z, w, d } = room.bounds;
@@ -88,7 +146,8 @@ function toWorldOpening(
 }
 
 /**
- * Builds 3D floor, walls (with real door/window openings), ceiling, and label for one room.
+ * Builds 3D tiled floor, walls (with door frames, window glass, and department accent strip),
+ * ceiling, and smart room label.
  */
 export class RoomBuilder {
   static build(
@@ -104,25 +163,34 @@ export class RoomBuilder {
 
     const { x, z, w, d } = room.bounds;
 
-    // Floor surface colored by department
+    // Tiled floor surface tinted by department color
     const floorGeo = new THREE.PlaneGeometry(Math.max(0.1, w - 0.02), Math.max(0.1, d - 0.02));
+    const tex = getFloorTileTexture(dept.floorColor).clone();
+    tex.needsUpdate = true;
+    tex.repeat.set(Math.max(1, w / 2.4), Math.max(1, d / 2.4));
+
     const floorMat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(dept.floorColor),
-      roughness: 0.72,
-      metalness: 0.03,
+      map: tex,
+      roughness: 0.62,
+      metalness: 0.04,
     });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.position.set(x + w / 2, 0.02, z + d / 2);
     floorMesh.receiveShadow = true;
     floorMesh.userData.id = room.id;
+    floorMesh.userData.isFloor = true;
     group.add(floorMesh);
 
-    // Build 4 perimeter walls unless this is an open courtyard without walls
+    // Build 4 perimeter walls with accent baseboard strip & door frames
     if (room.type !== 'courtyard') {
+      const accentMat = new THREE.MeshStandardMaterial({
+        color: new THREE.Color(dept.accentColor),
+        roughness: 0.55,
+      });
       const sides: WallSide[] = ['N', 'S', 'W', 'E'];
       for (const side of sides) {
-        this.buildWallSide(group, room, side, wallHeight, floorOpenings);
+        this.buildWallSide(group, room, side, wallHeight, floorOpenings, accentMat);
       }
     }
 
@@ -137,7 +205,7 @@ export class RoomBuilder {
       group.add(ceilingMesh);
     }
 
-    // Room label badge (skip minor circulation/utility rooms to keep view clean)
+    // Smart room label badge
     const labelDiv = document.createElement('div');
     labelDiv.className = 'room-label';
     labelDiv.textContent = room.name;
@@ -160,21 +228,18 @@ export class RoomBuilder {
     side: WallSide,
     wallHeight: number,
     floorOpenings: WorldOpening[],
+    accentMat: THREE.Material,
   ): void {
     const { x, z, w, d } = room.bounds;
     const isHorizontal = side === 'N' || side === 'S';
     const axis: 'X' | 'Z' = isHorizontal ? 'X' : 'Z';
-    const lineCoord =
-      side === 'N' ? z : side === 'S' ? z + d : side === 'W' ? x : x + w;
+    const lineCoord = side === 'N' ? z : side === 'S' ? z + d : side === 'W' ? x : x + w;
     const wallStart = isHorizontal ? x : z;
     const wallEnd = isHorizontal ? x + w : z + d;
 
-    // Inset wall center slightly inside room bounds to avoid z-fighting with neighbor rooms
-    const inset =
-      side === 'N' || side === 'W' ? WALL_THICKNESS / 2 : -WALL_THICKNESS / 2;
+    const inset = side === 'N' || side === 'W' ? WALL_THICKNESS / 2 : -WALL_THICKNESS / 2;
     const fixedPos = lineCoord + inset;
 
-    // Find all openings along this wall line that overlap [wallStart, wallEnd]
     const matching = floorOpenings
       .filter(
         (op) =>
@@ -194,30 +259,53 @@ export class RoomBuilder {
 
     for (const op of matching) {
       if (op.start > cursor + 0.01) {
-        this.addWallBox(group, room.id, isHorizontal, fixedPos, cursor, op.start, 0, wallHeight);
+        this.addWallSegment(group, room.id, isHorizontal, fixedPos, cursor, op.start, 0, wallHeight, accentMat);
       }
 
-      // Sill below window
       if (op.bottomY > 0.01) {
-        this.addWallBox(group, room.id, isHorizontal, fixedPos, op.start, op.end, 0, op.bottomY);
+        this.addWallBox(group, room.id, isHorizontal, fixedPos, op.start, op.end, 0, op.bottomY, sharedWallMat);
       }
 
-      // Lintel above door or window
       if (op.topY < wallHeight - 0.01) {
-        this.addWallBox(group, room.id, isHorizontal, fixedPos, op.start, op.end, op.topY, wallHeight);
+        this.addWallBox(group, room.id, isHorizontal, fixedPos, op.start, op.end, op.topY, wallHeight, sharedWallMat);
       }
 
-      // Glass pane for windows
       if (op.isWindow) {
         this.addWindowGlass(group, room.id, isHorizontal, fixedPos, op.start, op.end, op.bottomY, op.topY);
+      } else {
+        // Door header trim bar so openings read clearly
+        this.addWallBox(group, room.id, isHorizontal, fixedPos, op.start, op.end, op.topY - 0.07, op.topY, sharedFrameMat);
       }
 
       cursor = Math.max(cursor, op.end);
     }
 
     if (cursor < wallEnd - 0.01) {
-      this.addWallBox(group, room.id, isHorizontal, fixedPos, cursor, wallEnd, 0, wallHeight);
+      this.addWallSegment(group, room.id, isHorizontal, fixedPos, cursor, wallEnd, 0, wallHeight, accentMat);
     }
+  }
+
+  private static addWallSegment(
+    group: THREE.Group,
+    roomId: string,
+    isHorizontal: boolean,
+    fixedPos: number,
+    start: number,
+    end: number,
+    bottomY: number,
+    topY: number,
+    accentMat: THREE.Material,
+  ): void {
+    this.addWallBox(group, roomId, isHorizontal, fixedPos, start, end, bottomY, topY, sharedWallMat);
+    // Subtle colored baseboard stripe at floor level for visual depth & department identity
+    const stripeGeo = isHorizontal
+      ? new THREE.BoxGeometry(end - start, 0.12, WALL_THICKNESS + 0.015)
+      : new THREE.BoxGeometry(WALL_THICKNESS + 0.015, 0.12, end - start);
+    const stripe = new THREE.Mesh(stripeGeo, accentMat);
+    const mid = (start + end) / 2;
+    stripe.position.set(isHorizontal ? mid : fixedPos, 0.06, isHorizontal ? fixedPos : mid);
+    stripe.userData.id = roomId;
+    group.add(stripe);
   }
 
   private static addWallBox(
@@ -229,6 +317,7 @@ export class RoomBuilder {
     end: number,
     bottomY: number,
     topY: number,
+    mat: THREE.Material,
   ): void {
     const length = end - start;
     const height = topY - bottomY;
@@ -238,13 +327,9 @@ export class RoomBuilder {
       ? new THREE.BoxGeometry(length, height, WALL_THICKNESS)
       : new THREE.BoxGeometry(WALL_THICKNESS, height, length);
 
-    const mesh = new THREE.Mesh(geo, sharedWallMat);
+    const mesh = new THREE.Mesh(geo, mat);
     const mid = (start + end) / 2;
-    mesh.position.set(
-      isHorizontal ? mid : fixedPos,
-      bottomY + height / 2,
-      isHorizontal ? fixedPos : mid,
-    );
+    mesh.position.set(isHorizontal ? mid : fixedPos, bottomY + height / 2, isHorizontal ? fixedPos : mid);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.userData.id = roomId;
@@ -271,11 +356,7 @@ export class RoomBuilder {
 
     const glass = new THREE.Mesh(geo, sharedGlassMat);
     const mid = (start + end) / 2;
-    glass.position.set(
-      isHorizontal ? mid : fixedPos,
-      bottomY + height / 2,
-      isHorizontal ? fixedPos : mid,
-    );
+    glass.position.set(isHorizontal ? mid : fixedPos, bottomY + height / 2, isHorizontal ? fixedPos : mid);
     glass.userData.id = roomId;
     group.add(glass);
   }

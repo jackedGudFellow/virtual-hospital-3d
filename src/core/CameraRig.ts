@@ -32,6 +32,7 @@ export class CameraRig {
   private tween: ActiveTween | null = null;
   private walkMode = false;
   private floorWalk: FloorWalkData | null = null;
+  private walkTarget: THREE.Vector3 | null = null;
   private yaw = 0;
   private pitch = 0;
   private keys = new Set<string>();
@@ -61,6 +62,11 @@ export class CameraRig {
 
   isWalking(): boolean {
     return this.walkMode;
+  }
+
+  glideWalkTo(x: number, z: number): void {
+    if (!this.walkMode) return;
+    this.walkTarget = new THREE.Vector3(x, (this.floorWalk?.floorY ?? 0) + EYE_HEIGHT, z);
   }
 
   setWalkInput(x: number, y: number): void {
@@ -207,6 +213,7 @@ export class CameraRig {
     strafe += this.joystickInput.x;
 
     if (Math.abs(forward) > 0.01 || Math.abs(strafe) > 0.01) {
+      this.walkTarget = null;
       const fwdVec = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
       const rightVec = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
       const move = new THREE.Vector3()
@@ -222,6 +229,29 @@ export class CameraRig {
       }
       if (this.canWalkTo(this.camera.position.x, curZ, this.camera.position.x, curZ + move.z)) {
         this.camera.position.z += move.z;
+      }
+    } else if (this.walkTarget) {
+      const dx = this.walkTarget.x - this.camera.position.x;
+      const dz = this.walkTarget.z - this.camera.position.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist < 0.15) {
+        this.walkTarget = null;
+      } else {
+        const step = Math.min(dist, WALK_SPEED * 1.15 * dt);
+        const mx = (dx / dist) * step;
+        const mz = (dz / dist) * step;
+        const curX = this.camera.position.x;
+        const curZ = this.camera.position.z;
+        let moved = false;
+        if (this.canWalkTo(curX, curZ, curX + mx, curZ)) {
+          this.camera.position.x += mx;
+          moved = true;
+        }
+        if (this.canWalkTo(this.camera.position.x, curZ, this.camera.position.x, curZ + mz)) {
+          this.camera.position.z += mz;
+          moved = true;
+        }
+        if (!moved) this.walkTarget = null;
       }
     }
 

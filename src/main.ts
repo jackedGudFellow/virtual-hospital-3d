@@ -295,6 +295,12 @@ function bootstrap(): void {
     guidedTour.stop();
   });
 
+  bus.on('walk:goto', ({ x, y, z }) => {
+    if (!cameraRig.isWalking()) return;
+    cameraRig.glideWalkTo(x, z);
+    atmosphere.showWalkMarker(new THREE.Vector3(x, y, z));
+  });
+
   engine.onUpdate((dt) => {
     buildingBuilder.update(dt);
     atmosphere.update(dt);
