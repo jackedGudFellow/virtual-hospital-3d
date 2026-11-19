@@ -8,6 +8,7 @@ import { DrugSpec } from '../rooms/PharmacyTypes';
 import { Breadcrumb } from './Breadcrumb';
 import { EquipmentEntry, InfoPanel } from './InfoPanel';
 import { Minimap } from './Minimap';
+import { Onboarding } from './Onboarding';
 import { PharmacyPanel } from './PharmacyPanel';
 import { SearchBox } from './SearchBox';
 import { TouchJoystick } from './TouchJoystick';
@@ -125,6 +126,7 @@ export class Hud {
         </div>
 
         <div class="hud-controls hud-interactive">
+          <button type="button" class="hud-btn" id="btn-copy-link">Copy Link</button>
           <button type="button" class="hud-btn" id="btn-tour">${t('tour')}</button>
           <div class="settings-wrap">
             <button type="button" class="hud-btn" id="btn-settings" aria-haspopup="true" aria-expanded="false">${t('settings')}</button>
@@ -154,6 +156,7 @@ export class Hud {
 
       <div class="info-panel hud-interactive hidden" id="hud-info-panel"></div>
       <div class="hud-interactive" id="hud-pharmacy-root"></div>
+      <div class="onboarding-host hud-interactive hidden" id="hud-onboarding"></div>
 
       <div class="pharmacy-modal hud-interactive hidden" id="hud-help-modal" role="dialog" aria-modal="true" aria-label="How to Explore">
         <div class="pharmacy-modal-card">
@@ -215,7 +218,14 @@ export class Hud {
 
   private initSubModules(onJoystick: (x: number, y: number) => void): void {
     this.breadcrumb = new Breadcrumb(this.root.querySelector('#hud-breadcrumb')!, this.bus);
-    new SearchBox(this.root.querySelector('#hud-search')!, this.index, this.bus);
+    new SearchBox(
+      this.root.querySelector('#hud-search')!,
+      this.index,
+      this.bus,
+      this.roomTypes,
+      this.equipmentMap,
+      this.drugs,
+    );
     this.infoPanel = new InfoPanel(
       this.root.querySelector('#hud-info-panel')!,
       this.bus,
@@ -226,6 +236,7 @@ export class Hud {
     this.minimap = new Minimap(this.root.querySelector('#hud-minimap')!, this.index, this.bus);
     this.touchJoystick = new TouchJoystick(this.root.querySelector('#hud-joystick')!, onJoystick);
     this.pharmacyPanel = new PharmacyPanel(this.root.querySelector('#hud-pharmacy-root')!, this.drugs, this.bus);
+    new Onboarding(this.root.querySelector('#hud-onboarding')!);
   }
 
   private bindEvents(): void {
@@ -424,6 +435,55 @@ export class Hud {
       helpModal.classList.add('hidden');
       helpBtn?.focus();
     });
+
+    const copyBtn = this.root.querySelector('#btn-copy-link') as HTMLButtonElement | null;
+    copyBtn?.addEventListener('click', () => {
+      const url = window.location.href;
+      if (navigator.clipboard?.writeText) {
+        void navigator.clipboard.writeText(url);
+      }
+      copyBtn.textContent = 'Copied!';
+      window.setTimeout(() => {
+        copyBtn.textContent = 'Copy Link';
+      }, 1400);
+    });
+
+    // Restore shareable URL hash state after main.ts event listeners are wired
+    window.setTimeout(() => {
+      const { floor, room, mode } = StateStore.parseHashState();
+      if (room && this.index.rooms.has(room)) {
+        if (mode === 'ROOM') {
+          this.bus.emit('room:enter', { roomId: room });
+        } else {
+          this.bus.emit('search:flyto', { roomId: room });
+        }
+      } else if (floor) {
+        this.bus.emit('floor:view', { viewMode: 'isolate', floorId: floor });
+      }
+    }, 60);
+
+    // Touch long-press (550ms) on canvas enters the currently selected room
+    const canvasHost = document.getElementById('canvas-container');
+    let longPressTimer: number | null = null;
+    canvasHost?.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'touch') return;
+      const s = this.store.getState();
+      if (s.activeRoom && s.mode !== 'ROOM') {
+        const rid = s.activeRoom;
+        longPressTimer = window.setTimeout(() => {
+          this.bus.emit('room:enter', { roomId: rid });
+        }, 550);
+      }
+    });
+    const clearLongPress = (): void => {
+      if (longPressTimer !== null) {
+        window.clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+    canvasHost?.addEventListener('pointerup', clearLongPress);
+    canvasHost?.addEventListener('pointermove', clearLongPress);
+    canvasHost?.addEventListener('pointercancel', clearLongPress);
 
     window.addEventListener('keydown', this.handleKeyDown);
   }

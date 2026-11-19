@@ -23,16 +23,33 @@ export class Minimap {
     this.bus = bus;
     this.el.setAttribute('role', 'region');
     this.el.setAttribute('aria-label', 'Floor minimap');
+    const floorTabs = this.index.floors
+      .map(
+        (f) =>
+          `<button type="button" class="minimap-tab ${f.id === 'L1' ? 'active' : ''}" data-mm-floor="${f.id}">${f.id}</button>`,
+      )
+      .join('');
+
     this.el.innerHTML = `
       <div class="minimap-header">
         <span class="minimap-title" id="minimap-title">${t('minimapFloor')} L1</span>
         <span class="minimap-sub" id="minimap-sub">${t('minimapSub')}</span>
       </div>
+      <div class="minimap-tabs" role="group" aria-label="Minimap floor selector">${floorTabs}</div>
       <canvas width="180" height="150" class="minimap-canvas" id="minimap-canvas" title="Click any room to fly there"></canvas>
     `;
     this.canvas = this.el.querySelector('#minimap-canvas') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d')!;
     this.titleEl = this.el.querySelector('#minimap-title') as HTMLElement;
+
+    for (const tab of this.el.querySelectorAll<HTMLButtonElement>('.minimap-tab')) {
+      tab.addEventListener('click', () => {
+        const fid = tab.dataset.mmFloor;
+        if (fid) {
+          this.bus.emit('floor:view', { viewMode: 'isolate', floorId: fid });
+        }
+      });
+    }
 
     onLangChange(() => {
       this.titleEl.textContent = `${t('minimapFloor')} ${this.activeFloorId}`;
@@ -73,6 +90,9 @@ export class Minimap {
     this.activeFloorId = floorId ?? 'L1';
     this.activeRoomId = roomId;
     this.titleEl.textContent = `${t('minimapFloor')} ${this.activeFloorId}`;
+    for (const tab of this.el.querySelectorAll<HTMLButtonElement>('.minimap-tab')) {
+      tab.classList.toggle('active', tab.dataset.mmFloor === this.activeFloorId);
+    }
   }
 
   update(cameraPos: THREE.Vector3, yaw: number): void {
