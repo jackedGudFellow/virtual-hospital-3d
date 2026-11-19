@@ -26,4 +26,10 @@
 - **Typical floor reuse (L4–L5):** `L5` references `"templateFrom": "L4"` in `hospital.json`; `BuildingBuilder` clones L4's footprint and rooms and rewrites the `L4.` ID prefix to `L5.`.
 - **Vertical circulation:** `North Lifts & Stairwell` (`x: 18..32, z: 16..22`) is aligned across L1–L5 with procedural elevator shafts and 12-step staircases built on every floor.
 
+## Step 0: Baseline
+- Created branch `step-00-baseline` from clean `main` (`d34362c`).
+- Verified baseline `npm run typecheck`, `npm run build` (`dist/` = `0.72 MB`, JS = `736.36 kB` / gzip `187.41 kB`), and `npm run qa` (153 rooms across 5 floors, 120 drugs across 12 cabinets) without running `npm ci` over network because `node_modules` was already freshly installed from `package-lock.json`.
+- Interactive browser smoke checks are tracked honestly as `PENDING MANUAL / STEP 5 E2E` in `docs/SMOKE_TEST.md` until run in a live browser or automated with Playwright in Step 5.
+
+
 
