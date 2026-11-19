@@ -139,6 +139,12 @@ export class Hud {
               <button type="button" class="hud-btn" id="btn-quality">${t('qualityHigh')}</button>
               <button type="button" class="hud-btn" id="btn-contrast">${t('contrast')}</button>
               <button type="button" class="hud-btn" id="btn-plan-overlay">Plan Overlay: Off</button>
+              <button type="button" class="hud-btn" id="btn-layer-infection">${t('layerInfection')}</button>
+              <button type="button" class="hud-btn" id="btn-layer-medgas">${t('layerMedGas')}</button>
+              <button type="button" class="hud-btn" id="btn-layer-fire">${t('layerFire')}</button>
+              <button type="button" class="hud-btn" id="btn-journey-chemo">${t('journeyChemo')}</button>
+              <button type="button" class="hud-btn" id="btn-journey-nicu">${t('journeyNicu')}</button>
+              <button type="button" class="hud-btn" id="btn-journey-med">${t('journeyMed')}</button>
               <button type="button" class="hud-btn" id="btn-lang">${t('langBtn')}</button>
             </div>
           </div>
@@ -200,6 +206,8 @@ export class Hud {
       <div class="touch-joystick hud-interactive hidden" id="hud-joystick"></div>
       <div class="tour-banner hud-interactive hidden" id="tour-banner" role="status" aria-live="polite">
         <span id="tour-step-title">Guided Tour</span>
+        <button type="button" class="hud-btn" id="tour-pause-btn">Pause</button>
+        <button type="button" class="hud-btn" id="tour-next-btn">Next</button>
         <button type="button" class="hud-btn" id="tour-skip-btn">${t('skipTour')}</button>
       </div>
       <div class="hover-tooltip hidden" id="hover-tooltip"></div>
@@ -347,9 +355,37 @@ export class Hud {
     this.root.querySelector('#btn-tour')?.addEventListener('click', () => {
       this.bus.emit('tour:start', {});
     });
+    this.root.querySelector('#tour-pause-btn')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('vh3d:journey', { detail: { action: 'pause' } }));
+    });
+    this.root.querySelector('#tour-next-btn')?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('vh3d:journey', { detail: { action: 'next' } }));
+    });
     this.root.querySelector('#tour-skip-btn')?.addEventListener('click', () => {
       this.bus.emit('tour:stop', {});
     });
+
+    const startJourney = (journeyId: string): void => {
+      window.dispatchEvent(new CustomEvent('vh3d:journey', { detail: { action: 'start', journeyId } }));
+      this.settingsMenu.classList.add('hidden');
+    };
+    this.root.querySelector('#btn-journey-chemo')?.addEventListener('click', () => startJourney('chemo-day'));
+    this.root.querySelector('#btn-journey-nicu')?.addEventListener('click', () => startJourney('nicu-path'));
+    this.root.querySelector('#btn-journey-med')?.addEventListener('click', () => startJourney('med-supply'));
+
+    const layerState = { infection: false, medGas: false, fireEgress: false };
+    const bindLayerToggle = (id: string, key: keyof typeof layerState, label: string): void => {
+      const b = this.root.querySelector(id) as HTMLButtonElement | null;
+      b?.addEventListener('click', () => {
+        layerState[key] = !layerState[key];
+        b.textContent = `${label}: ${layerState[key] ? 'On' : 'Off'}`;
+        b.classList.toggle('active', layerState[key]);
+        window.dispatchEvent(new CustomEvent('vh3d:layers', { detail: { [key]: layerState[key] } }));
+      });
+    };
+    bindLayerToggle('#btn-layer-infection', 'infection', 'Infection Zones');
+    bindLayerToggle('#btn-layer-medgas', 'medGas', 'Med-Gas Route');
+    bindLayerToggle('#btn-layer-fire', 'fireEgress', 'Fire/Egress');
 
     this.bus.on('tour:step', ({ title, active }) => {
       this.tourBanner.classList.toggle('hidden', !active);

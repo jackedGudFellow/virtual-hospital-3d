@@ -36,6 +36,9 @@ export class Atmosphere {
   private walkRing: THREE.Mesh;
   private walkRingTimer = 0;
   private originOffset: number[];
+  private infectionGroup = new THREE.Group();
+  private medGasGroup = new THREE.Group();
+  private fireEgressGroup = new THREE.Group();
 
   constructor(data: HospitalData) {
     this.group.name = 'hospital-atmosphere';
@@ -138,6 +141,69 @@ export class Atmosphere {
     this.walkRing.rotation.x = -Math.PI / 2;
     this.walkRing.visible = false;
     this.group.add(this.walkRing);
+
+    this.buildLearningOverlays(data);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('vh3d:layers', this.onLayersEvent as EventListener);
+    }
+  }
+
+  private onLayersEvent = (e: CustomEvent<{ infection?: boolean; medGas?: boolean; fireEgress?: boolean }>): void => {
+    if (typeof e.detail.infection === 'boolean') this.infectionGroup.visible = e.detail.infection;
+    if (typeof e.detail.medGas === 'boolean') this.medGasGroup.visible = e.detail.medGas;
+    if (typeof e.detail.fireEgress === 'boolean') this.fireEgressGroup.visible = e.detail.fireEgress;
+  };
+
+  private buildLearningOverlays(data: HospitalData): void {
+    const noHit = (): void => {};
+    const makeZone = (x: number, y: number, z: number, w: number, d: number, hex: number): THREE.Mesh => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, d),
+        new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.36, depthWrite: false, side: THREE.DoubleSide }),
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(x + w / 2, y + 0.08, z + d / 2);
+      m.raycast = noHit;
+      return m;
+    };
+
+    const makeLine = (pts: Array<[number, number, number]>, hex: number): THREE.Line => {
+      const geo = new THREE.BufferGeometry().setFromPoints(pts.map(([x, y, z]) => new THREE.Vector3(x, y, z)));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: hex }));
+      line.raycast = noHit;
+      return line;
+    };
+
+    // 1. Infection-control zones (Clean = emerald, Dirty = amber/red, Restricted/Isolation = violet)
+    this.infectionGroup.visible = false;
+    this.infectionGroup.add(
+      makeZone(0, 0, 26, 20, 16, 0x10b981), // L1 Surgery clean core
+      makeZone(38, 0, 46, 9, 14, 0x10b981), // L1 Pharmacy clean
+      makeZone(28, 0, 26, 7, 8, 0xf59e0b),  // L1 Sterilization dirty/wash
+      makeZone(42, 0, 26, 14, 8, 0xef4444), // L1 Cytotoxic hazardous
+      makeZone(43, 0, 11, 7, 6, 0x8b5cf6),  // L1 ICU Isolation
+      makeZone(9, data.building.floorHeight, 0, 9, 14, 0x8b5cf6), // L2 BMT Isolation
+      makeZone(60, data.building.floorHeight, 3, 10, 5, 0x8b5cf6), // L2 NICU Isolation
+    );
+    this.group.add(this.infectionGroup);
+
+    // 2. Medical-gas route (Drawing A: L2 NICU Medical Gas Room -> Isolation -> 8-Bay Open Ward)
+    const l2Y = data.building.floorHeight + 0.2;
+    this.medGasGroup.visible = false;
+    this.medGasGroup.add(
+      makeLine([[62.5, l2Y, 1.5], [62.5, l2Y, 5.5], [68, l2Y, 5.5], [68, l2Y, 12], [75, l2Y, 12]], 0x0284c7),
+      makeLine([[48, 0.2, 5.5], [48, 0.2, 24], [10, 0.2, 24], [4.5, 0.2, 30]], 0x0284c7), // L1 ICU <-> OR gas spine
+    );
+    this.group.add(this.medGasGroup);
+
+    // 3. Fire exits & accessible egress routes (L1/L2 corridor spines to North Stairwell & South Lobby Exit)
+    this.fireEgressGroup.visible = false;
+    this.fireEgressGroup.add(
+      makeLine([[4, 0.18, 24], [25, 0.18, 24], [25, 0.18, 19]], 0x16a34a),
+      makeLine([[52, 0.18, 44], [31, 0.18, 44], [31, 0.18, 60]], 0x16a34a),
+      makeLine([[70, l2Y, 12], [58, l2Y, 6], [41.5, l2Y, 6], [41.5, l2Y, 24], [25, l2Y, 24], [25, l2Y, 19]], 0x16a34a),
+    );
+    this.group.add(this.fireEgressGroup);
   }
 
   showWalkMarker(worldPos: THREE.Vector3): void {

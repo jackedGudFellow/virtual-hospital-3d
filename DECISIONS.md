@@ -81,6 +81,12 @@
 - Added deterministic simulated stock/batch/expiry metadata (`getSimulatedStock`), Low Stock / Near Expiry badges, `scheduleByCountry` display, fridge out-of-range alert toggle (`4.2 °C` / `11.4 °C ALERT`), Controlled-Drug access log, side-by-side Compare modal, and filter pills (`All`, `Refrigerated`, `Controlled`, `Antibiotics`).
 - Upgraded `PharmacyDrugMesh.ts` with distinct shared-geometry procedural shapes per form (blister carton, bottle with neck/cap, metallic crimp-cap vial, L-shaped MDI inhaler with canister, IV pouch with port, injector pen, ointment tube).
 
+## Step 10: Learning Layer
+- Added `src/data/journeys.json` with 3 student-focused patient/clinical journeys (`chemo-day`, `nicu-path`, `med-supply`) plus overview tour; `GuidedTour.ts` supports play, pause, next, and skip via `vh3d:journey` CustomEvent.
+- Added non-pickable (`raycast = () => {}`) 3D overlays in `Atmosphere.ts` for Infection-Control Zones (Clean/Dirty/Restricted), Medical-Gas Routes (sourced from Drawing A's NICU Medical Gas Room + L1 ICU/OR spine), and Fire/Accessible Egress corridor spines, toggled via `vh3d:layers` CustomEvent in `Hud.ts`.
+- Enriched key room types in `roomTypes.json` with `staff` and `designNote` fields rendered inside `InfoPanel.ts`.
+
+
 
 
 

@@ -39,18 +39,24 @@
     "name": "Pharmacy — Dispensing",
     "department": "pharmacy",
     "description": "Public-facing hospital pharmacy with dispensing window, counseling nook, and medication cabinets.",
+    "staff": "Clinical pharmacists, pharmacy technicians",
+    "designNote": "Positioned beside the Main Lobby for easy patient pickup while keeping controlled drugs locked and bulk storage staff-only.",
     "equipment": ["Dispensing counter", "2 Workstations", "Label printer", "Cold-chain refrigerator", "Controlled-drug cabinet"]
   },
   "pharmacy-storage": {
     "name": "Pharmacy — Storage",
     "department": "pharmacy",
     "description": "Back-of-house bulk medication storage, cold room, narcotics safe, and receiving area.",
+    "staff": "Inventory pharmacy technicians, supply pharmacists",
+    "designNote": "Sits directly behind Dispensing and connects via a sealed pass-through hatch to Cytotoxic Drug Preparation to minimize hazardous transport.",
     "equipment": ["Floor-to-ceiling shelving", "IV fluid pallet racks", "Cold room", "Narcotics safe", "Pass-through hatch"]
   },
   "or": {
     "name": "Operating Room",
     "department": "surgery",
     "description": "Sterile surgical suite equipped for operative procedures.",
+    "staff": "Surgeons, anesthesiologists, scrub & circulating nurses",
+    "designNote": "Maintained under positive air pressure adjacent to Scrub-Up and Sterilization to preserve a strict sterile core.",
     "equipment": ["Operating table", "Surgical lights", "Anesthesia machine", "Patient monitor"]
   },
   "pre-op": {
@@ -99,6 +105,8 @@
     "name": "Intensive Care Unit (ICU)",
     "department": "icu",
     "description": "High-acuity critical care ward with continuous physiological monitoring.",
+    "staff": "Intensivists, critical care nurses, respiratory therapists",
+    "designNote": "Open sightlines from the central nursing station allow immediate visual monitoring of every ventilated bed.",
     "equipment": ["ICU beds", "Ventilators", "Infusion pumps", "Central nursing station"]
   },
   "isolation": {
@@ -183,6 +191,8 @@
     "name": "BMT Isolation Room",
     "department": "bmt",
     "description": "Positive-pressure bone marrow transplant isolation room with anteroom and private balcony.",
+    "staff": "Hematologists, BMT specialized nurses",
+    "designNote": "HEPA positive-pressure filtration and a gowning anteroom protect immunocompromised transplant patients, while the private balcony supports mental well-being during long stays.",
     "equipment": ["BMT bed", "HEPA filter unit", "Anteroom sink", "Vital signs monitor"]
   },
   "bmt-ward": {
@@ -255,6 +265,8 @@
     "name": "NICU 8-Bay Open Ward",
     "department": "nursery",
     "description": "Neonatal Intensive Care open ward with 8 numbered bays in two columns.",
+    "staff": "Neonatologists, NICU nurses, lactation specialists",
+    "designNote": "Two columns of 4 bays face the central 4-workstation nurse hub, flanked by dedicated medical-gas supply, milk prep, and separate clean/dirty utilities.",
     "equipment": ["8 Incubators/cots", "Neonatal monitors", "Ventilators", "Supply carts"]
   },
   "nicu-isolation": {

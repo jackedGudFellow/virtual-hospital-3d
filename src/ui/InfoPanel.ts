@@ -85,7 +85,10 @@ export class InfoPanel {
 
     const { room, floor, areaM2 } = this.currentRoom;
     const dept = this.departments[room.department];
-    const typeInfo = this.roomTypes[room.type];
+    const typeInfo = this.roomTypes[room.type] as (typeof this.roomTypes)[string] & {
+      staff?: string;
+      designNote?: string;
+    };
     const equipList = (typeInfo?.equipment ?? [])
       .map((item) => `<li>${item}</li>`)
       .join('');
@@ -103,6 +106,8 @@ export class InfoPanel {
       <h2 class="info-room-title" dir="auto">${room.name}</h2>
       <div class="info-room-meta">${t('area')}: <strong><bdi>${areaM2} m²</bdi></strong> · ${t('type')}: ${typeInfo?.name ?? room.type}</div>
       <p class="info-room-desc">${typeInfo?.description ?? 'Hospital clinical and support space.'}</p>
+      ${typeInfo?.staff ? `<div class="info-room-meta"><strong>Typical staff:</strong> ${typeInfo.staff}</div>` : ''}
+      ${typeInfo?.designNote ? `<p class="info-room-desc" style="background:#f0f9ff; padding:6px 8px; border-radius:6px; border-left:3px solid #0c6273;"><strong>Why this design:</strong> ${typeInfo.designNote}</p>` : ''}
       ${
         equipList
           ? `<div class="info-equip-section">
