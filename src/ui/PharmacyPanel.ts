@@ -1,12 +1,25 @@
 import * as THREE from 'three';
 import { EventBus } from '../core/Events';
 import { onLangChange, t } from '../core/I18n';
+import scenariosJson from '../data/pharmacyScenarios.json';
 import { createDrugMesh } from '../rooms/PharmacyDrugMesh';
-import { DrugSpec, PHARMACY_CABINETS } from '../rooms/PharmacyTypes';
+import { DrugSpec, getSimulatedStock, PHARMACY_CABINETS } from '../rooms/PharmacyTypes';
+
+interface DispenseScenario {
+  id: string;
+  patient: string;
+  prescribedDrugId: string;
+  prescribedText: string;
+  candidateDrugIds: string[];
+  trapNote: string;
+  batchStatus: 'valid' | 'expired';
+}
+
+const SCENARIOS = scenariosJson as DispenseScenario[];
 
 /**
- * Pharmacy UI: Drug Search Bar, 3D Drug Inspect Panel (drag-to-rotate + Prev/Next),
- * Controlled-Drug Pharmacist Badge Unlock, and Dispense-a-Prescription mini-interaction.
+ * Pharmacy UI: Drug Search & Filter Bar, 3D Drug Inspect Panel (stock/expiry/scheduleByCountry),
+ * Compare Modal, Fridge Alert, Controlled-Drug Access Log, Dispense Rx, and LASA/Expiry Rx Check.
  */
 export class PharmacyPanel {
   private root: HTMLElement;
@@ -20,6 +33,8 @@ export class PharmacyPanel {
   private activeDrug: DrugSpec | null = null;
   private previewRenderer: THREE.WebGLRenderer | null = null;
   private previewRaf: number | null = null;
+  private fridgeOutOfRange = false;
+  private controlledLogs: string[] = [];
 
   constructor(container: HTMLElement, drugs: DrugSpec[], bus: EventBus) {
     this.root = container;
@@ -39,8 +54,12 @@ export class PharmacyPanel {
     if (search) search.placeholder = t('pharmacySearch');
     const disp = this.root.querySelector('#pharmacy-dispense-open');
     if (disp) disp.textContent = t('dispenseRx');
-    const quiz = this.root.querySelector('#pharmacy-quiz-open');
-    if (quiz) quiz.textContent = t('quizMe');
+    const check = this.root.querySelector('#pharmacy-rxcheck-open');
+    if (check) check.textContent = t('verifyRx');
+    const cmp = this.root.querySelector('#pharmacy-compare-open');
+    if (cmp) cmp.textContent = t('compareDrugs');
+    const fridge = this.root.querySelector('#pharmacy-fridge-btn');
+    if (fridge) fridge.textContent = t(this.fridgeOutOfRange ? 'fridgeAlert' : 'fridgeNormal');
   }
 
   private renderShell(): void {
@@ -51,7 +70,7 @@ export class PharmacyPanel {
 
     this.root.innerHTML = `
       <div class="pharmacy-toolbar hidden" id="pharmacy-toolbar" role="region" aria-label="Pharmacy inventory controls">
-        <div class="pharmacy-toolbar-row">
+        <div class="pharmacy-toolbar-row" style="flex-wrap:wrap">
           <div class="pharmacy-toolbar-title">${t('pharmacyTitle')}</div>
           <input
             type="search"
@@ -62,9 +81,17 @@ export class PharmacyPanel {
             autocomplete="off"
           />
           <button type="button" class="hud-btn active" id="pharmacy-dispense-open">${t('dispenseRx')}</button>
-          <button type="button" class="hud-btn" id="pharmacy-quiz-open">${t('quizMe')}</button>
+          <button type="button" class="hud-btn" id="pharmacy-rxcheck-open">${t('verifyRx')}</button>
+          <button type="button" class="hud-btn" id="pharmacy-compare-open">${t('compareDrugs')}</button>
+          <button type="button" class="hud-btn" id="pharmacy-fridge-btn">${t('fridgeNormal')}</button>
         </div>
-        <div class="pharmacy-cab-strip" role="toolbar" aria-label="Pharmacy cabinets A to L">${cabBtns}</div>
+        <div class="pharmacy-cab-strip" role="toolbar" aria-label="Pharmacy filters and cabinets">
+          <button type="button" class="hud-btn pharm-filter" data-filter="">All</button>
+          <button type="button" class="hud-btn pharm-filter" data-filter="insulin">Refrigerated</button>
+          <button type="button" class="hud-btn pharm-filter" data-filter="controlled">Controlled</button>
+          <button type="button" class="hud-btn pharm-filter" data-filter="antibiotic">Antibiotics</button>
+          ${cabBtns}
+        </div>
       </div>
       <div class="pharmacy-inspect hidden" id="pharmacy-inspect" role="region" aria-label="Medication inspector"></div>
       <div class="pharmacy-modal hidden" id="pharmacy-modal" role="dialog" aria-modal="true" aria-label="Pharmacy dialog"></div>
@@ -79,13 +106,25 @@ export class PharmacyPanel {
       this.bus.emit('pharmacy:search', { query: searchInput.value });
     });
 
-    this.root.querySelector('#pharmacy-dispense-open')?.addEventListener('click', () => {
-      this.openDispenseModal();
+    this.root.querySelector('#pharmacy-dispense-open')?.addEventListener('click', () => this.openDispenseModal());
+    this.root.querySelector('#pharmacy-rxcheck-open')?.addEventListener('click', () => this.openRxCheckModal(0, 0));
+    this.root.querySelector('#pharmacy-compare-open')?.addEventListener('click', () => this.openCompareModal());
+
+    const fridgeBtn = this.root.querySelector('#pharmacy-fridge-btn') as HTMLButtonElement | null;
+    fridgeBtn?.addEventListener('click', () => {
+      this.fridgeOutOfRange = !this.fridgeOutOfRange;
+      fridgeBtn.textContent = t(this.fridgeOutOfRange ? 'fridgeAlert' : 'fridgeNormal');
+      fridgeBtn.style.borderColor = this.fridgeOutOfRange ? '#dc2626' : '';
+      fridgeBtn.style.color = this.fridgeOutOfRange ? '#b91c1c' : '';
     });
 
-    this.root.querySelector('#pharmacy-quiz-open')?.addEventListener('click', () => {
-      this.openQuizModal();
-    });
+    for (const fBtn of this.root.querySelectorAll<HTMLButtonElement>('.pharm-filter')) {
+      fBtn.addEventListener('click', () => {
+        const q = fBtn.dataset.filter ?? '';
+        searchInput.value = q;
+        this.bus.emit('pharmacy:search', { query: q });
+      });
+    }
 
     const cabButtons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.cab-pill'));
     cabButtons.forEach((btn, idx) => {
@@ -118,11 +157,17 @@ export class PharmacyPanel {
 
     const cabDrugs = this.drugs.filter((d) => d.cabinet === drug.cabinet);
     const idx = cabDrugs.findIndex((d) => d.id === drug.id);
+    const stock = getSimulatedStock(drug);
+    const countrySched = drug.scheduleByCountry
+      ? Object.entries(drug.scheduleByCountry)
+          .map(([c, s]) => `${c}: ${s}`)
+          .join(' · ')
+      : '';
 
     this.inspectEl.classList.remove('hidden');
     this.inspectEl.innerHTML = `
       <div class="info-panel-header">
-        <span class="info-dept-badge" style="background:#d1fae5; color:#065f46; border-color:#059669">
+        <span class="info-dept-badge" style="background:#d1fae5; color:#0f172a; border-color:#059669">
           <bdi>Cab ${drug.cabinet} · Shelf ${drug.shelf} · Slot ${drug.slot}</bdi>
         </span>
         <button type="button" class="info-close-btn" id="drug-close-btn" aria-label="${t('close')}">✕</button>
@@ -133,9 +178,15 @@ export class PharmacyPanel {
       </div>
       <h2 class="info-room-title"><bdi dir="auto">${drug.genericName}</bdi></h2>
       <div class="info-room-meta"><strong><bdi>${drug.strength}</bdi></strong> · ${drug.form} · ${t('schedule')}: <strong>${drug.schedule}</strong></div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:11px;">
+        <span class="info-dept-badge" style="background:#f1f5f9; color:#0f172a; border-color:#94a3b8">Qty: ${stock.quantity} · ${stock.batchNumber} · Exp ${stock.expiryDate}</span>
+        ${stock.isLowStock ? `<span class="info-dept-badge" style="background:#fef3c7; color:#78350f; border-color:#d97706">${t('lowStock')}</span>` : ''}
+        ${stock.isNearExpiry ? `<span class="info-dept-badge" style="background:#fee2e2; color:#7f1d1d; border-color:#dc2626">${t('nearExpiry')}</span>` : ''}
+      </div>
       <div class="drug-fields">
         <div><strong>${t('brands')}:</strong> <bdi dir="auto">${drug.brandExamples.join(', ')}</bdi></div>
         <div><strong>${t('drugClass')}:</strong> ${drug.drugClass}</div>
+        ${countrySched ? `<div><strong>Regulatory:</strong> <bdi>${countrySched}</bdi></div>` : ''}
         <div><strong>${t('commonUses')}:</strong> ${drug.commonUses}</div>
         <div><strong>${t('storage')}:</strong> ${drug.storage}</div>
         <div class="drug-warning"><strong>${t('keyWarnings')}:</strong> ${drug.keyWarnings}</div>
@@ -181,7 +232,7 @@ export class PharmacyPanel {
     scene.add(dir);
 
     const cabMeta = PHARMACY_CABINETS.find((c) => c.id === drug.cabinet);
-    const mesh = createDrugMesh(drug, cabMeta?.color ?? '#0f768a');
+    const mesh = createDrugMesh(drug, cabMeta?.color ?? '#0c6273');
     mesh.scale.setScalar(1.35);
     scene.add(mesh);
 
@@ -214,19 +265,24 @@ export class PharmacyPanel {
   }
 
   openControlledBadgePrompt(): void {
+    const logHtml = this.controlledLogs.length
+      ? `<div style="font-size:11px; margin-bottom:8px; color:#334e68"><strong>${t('controlledLog')}:</strong><br/>${this.controlledLogs.slice(-3).join('<br/>')}</div>`
+      : '';
     this.modalEl.classList.remove('hidden');
     this.modalEl.innerHTML = `
       <div class="pharmacy-modal-card">
-        <h3>Controlled Drugs Cabinet (K)</h3>
-        <p>This cabinet stores Schedule II/Controlled medications and is locked.</p>
+        <h3>${t('controlledTitle')}</h3>
+        <p>${t('controlledDesc')}</p>
+        ${logHtml}
         <div class="pharmacy-modal-actions">
-          <button type="button" class="hud-btn active" id="badge-unlock-btn">Tap Pharmacist Badge</button>
-          <button type="button" class="hud-btn" id="modal-cancel-btn">Cancel</button>
+          <button type="button" class="hud-btn active" id="badge-unlock-btn">${t('tapBadge')}</button>
+          <button type="button" class="hud-btn" id="modal-cancel-btn">${t('cancel')}</button>
         </div>
-        <div class="drug-disclaimer">Educational simulation. Not medical advice.</div>
+        <div class="drug-disclaimer">${t('disclaimer')}</div>
       </div>
     `;
     this.modalEl.querySelector('#badge-unlock-btn')?.addEventListener('click', () => {
+      this.controlledLogs.push(`${new Date().toLocaleTimeString()} · Pharmacist Badge Verified (Cab K)`);
       this.bus.emit('pharmacy:unlockControlled', {});
       this.closeModal();
     });
@@ -242,15 +298,15 @@ export class PharmacyPanel {
     this.modalEl.classList.remove('hidden');
     this.modalEl.innerHTML = `
       <div class="pharmacy-modal-card">
-        <h3>Dispense a Prescription (Simulation)</h3>
-        <label class="dispense-label" for="dispense-drug-select">Select medication:</label>
+        <h3>${t('dispenseTitle')}</h3>
+        <label class="dispense-label" for="dispense-drug-select">${t('selectMed')}</label>
         <select id="dispense-drug-select" class="search-input">${options}</select>
         <div class="pharmacy-modal-actions">
-          <button type="button" class="hud-btn active" id="dispense-go-btn">Dispense to Window</button>
-          <button type="button" class="hud-btn" id="modal-cancel-btn">Close</button>
+          <button type="button" class="hud-btn active" id="dispense-go-btn">${t('dispenseBtn')}</button>
+          <button type="button" class="hud-btn" id="modal-cancel-btn">${t('close')}</button>
         </div>
         <div id="dispense-rx-label" class="rx-label hidden"></div>
-        <div class="drug-disclaimer">Educational simulation. Not medical advice.</div>
+        <div class="drug-disclaimer">${t('disclaimer')}</div>
       </div>
     `;
 
@@ -262,70 +318,121 @@ export class PharmacyPanel {
       const labelEl = this.modalEl.querySelector('#dispense-rx-label') as HTMLElement;
       labelEl.classList.remove('hidden');
       labelEl.innerHTML = `
-        <div class="rx-header">PHARMACY PRESCRIPTION LABEL</div>
-        <div><strong>Patient:</strong> Sample Patient</div>
-        <div><strong>Medication:</strong> ${drug.genericName} ${drug.strength} (${drug.form})</div>
-        <div><strong>Directions:</strong> As prescribed by physician</div>
-        <div class="rx-note">Educational simulation only · Verify with licensed pharmacist</div>
+        <div class="rx-header">${t('rxHeader')}</div>
+        <div><strong>${t('rxPatient')}:</strong> Sample Patient</div>
+        <div><strong>${t('rxMedication')}:</strong> ${drug.genericName} ${drug.strength} (${drug.form})</div>
+        <div><strong>${t('rxDirections')}:</strong> ${t('rxDirectionsVal')}</div>
+        <div class="rx-note">${t('rxNote')}</div>
       `;
     });
 
     this.modalEl.querySelector('#modal-cancel-btn')?.addEventListener('click', () => this.closeModal());
   }
 
-  openQuizModal(score = 0, total = 0): void {
-    const target = this.drugs[Math.floor(Math.random() * this.drugs.length)];
-    const correctCab = PHARMACY_CABINETS.find((c) => c.id === target.cabinet)!;
-    const distractors = PHARMACY_CABINETS.filter((c) => c.id !== target.cabinet)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3);
-    const options = [correctCab, ...distractors].sort(() => Math.random() - 0.5);
+  openRxCheckModal(idx: number, score: number): void {
+    const scn = SCENARIOS[idx % SCENARIOS.length];
+    const candidates = scn.candidateDrugIds
+      .map((id) => this.drugs.find((d) => d.id === id))
+      .filter((d): d is DrugSpec => Boolean(d));
 
     this.modalEl.classList.remove('hidden');
     this.modalEl.innerHTML = `
       <div class="pharmacy-modal-card">
-        <h3>Pharmacy Study Quiz · Score: ${score}/${total}</h3>
-        <p style="font-size:13px; margin:0 0 10px 0;">
-          Which cabinet stores <strong>${target.genericName}</strong> (${target.strength}, ${target.form})?
-        </p>
+        <h3>${t('verifyRx')} · ${t('quizScore')}: ${score}/${idx}</h3>
+        <div class="rx-label" style="margin-bottom:10px">
+          <div class="rx-header">SAMPLE PRESCRIPTION</div>
+          <div><strong>Patient:</strong> ${scn.patient}</div>
+          <div><strong>Order:</strong> ${scn.prescribedText}</div>
+          <div><strong>Batch Check:</strong> ${scn.batchStatus === 'expired' ? 'EXP 2025-04 (EXPIRED!)' : 'EXP 2028-06 (Valid)'}</div>
+        </div>
         <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-          ${options
+          ${candidates
             .map(
-              (c) =>
-                `<button type="button" class="hud-btn quiz-opt" data-cab="${c.id}">Cabinet ${c.id} — ${c.title}</button>`,
+              (d) =>
+                `<button type="button" class="hud-btn rx-check-opt" data-choice="${d.id}">${d.genericName} — ${d.strength} (${d.form})</button>`,
             )
             .join('')}
+          <button type="button" class="hud-btn rx-check-opt" data-choice="quarantine">Quarantine / Reject Expired Stock</button>
         </div>
-        <div id="quiz-feedback" style="font-size:12px; min-height:20px; margin-bottom:8px;"></div>
+        <div id="rx-check-feedback" style="font-size:12px; min-height:22px; margin-bottom:8px;"></div>
         <div class="pharmacy-modal-actions">
-          <button type="button" class="hud-btn active" id="quiz-next-btn">Next Question</button>
-          <button type="button" class="hud-btn" id="modal-cancel-btn">Close</button>
+          <button type="button" class="hud-btn active" id="rx-check-next">${t('quizNext')}</button>
+          <button type="button" class="hud-btn" id="modal-cancel-btn">${t('close')}</button>
         </div>
-        <div class="drug-disclaimer">Educational simulation. Not medical advice.</div>
+        <div class="drug-disclaimer">${t('disclaimer')}</div>
       </div>
     `;
 
     let answered = false;
     let nextScore = score;
-    const fb = this.modalEl.querySelector('#quiz-feedback') as HTMLElement;
+    const fb = this.modalEl.querySelector('#rx-check-feedback') as HTMLElement;
+    const expected = scn.batchStatus === 'expired' ? 'quarantine' : scn.prescribedDrugId;
 
-    for (const btn of this.modalEl.querySelectorAll<HTMLButtonElement>('.quiz-opt')) {
+    for (const btn of this.modalEl.querySelectorAll<HTMLButtonElement>('.rx-check-opt')) {
       btn.addEventListener('click', () => {
         if (answered) return;
         answered = true;
-        const ok = btn.dataset.cab === correctCab.id;
+        const ok = btn.dataset.choice === expected;
         if (ok) nextScore += 1;
         fb.style.color = ok ? '#059669' : '#dc2626';
-        fb.innerHTML = ok
-          ? `✓ Correct! <strong>${target.drugClass}</strong> — stored in Cabinet ${correctCab.id}.`
-          : `✕ Not quite. Stored in <strong>Cabinet ${correctCab.id} (${correctCab.title})</strong>.`;
-        this.bus.emit('pharmacy:cabinet', { cabinetId: correctCab.id });
+        fb.innerHTML = ok ? `✓ Correct! ${scn.trapNote}` : `✕ Incorrect. ${scn.trapNote}`;
       });
     }
 
-    this.modalEl.querySelector('#quiz-next-btn')?.addEventListener('click', () => {
-      this.openQuizModal(nextScore, answered ? total + 1 : total);
+    this.modalEl.querySelector('#rx-check-next')?.addEventListener('click', () => {
+      this.openRxCheckModal(idx + 1, nextScore);
     });
+    this.modalEl.querySelector('#modal-cancel-btn')?.addEventListener('click', () => this.closeModal());
+  }
+
+  openCompareModal(): void {
+    const opts = this.drugs
+      .map((d) => `<option value="${d.id}">${d.genericName} (${d.strength})</option>`)
+      .join('');
+
+    this.modalEl.classList.remove('hidden');
+    this.modalEl.innerHTML = `
+      <div class="pharmacy-modal-card" style="width:440px">
+        <h3>${t('compareDrugs')}</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+          <select id="cmp-drug-a" class="search-input" aria-label="First medication">${opts}</select>
+          <select id="cmp-drug-b" class="search-input" aria-label="Second medication">${opts}</select>
+        </div>
+        <div id="cmp-table" style="font-size:12px; line-height:1.5; margin-bottom:10px;"></div>
+        <div class="pharmacy-modal-actions">
+          <button type="button" class="hud-btn" id="modal-cancel-btn">${t('close')}</button>
+        </div>
+        <div class="drug-disclaimer">${t('disclaimer')}</div>
+      </div>
+    `;
+
+    const selA = this.modalEl.querySelector('#cmp-drug-a') as HTMLSelectElement;
+    const selB = this.modalEl.querySelector('#cmp-drug-b') as HTMLSelectElement;
+    if (this.drugs.length > 1) selB.selectedIndex = 1;
+    const tbl = this.modalEl.querySelector('#cmp-table') as HTMLElement;
+
+    const renderTable = (): void => {
+      const a = this.drugs.find((d) => d.id === selA.value);
+      const b = this.drugs.find((d) => d.id === selB.value);
+      if (!a || !b) return;
+      const fmtSched = (d: DrugSpec): string =>
+        d.scheduleByCountry
+          ? `${d.schedule} (${Object.entries(d.scheduleByCountry).map(([k, v]) => `${k}: ${v}`).join(', ')})`
+          : d.schedule;
+      tbl.innerHTML = `
+        <table style="width:100%; border-collapse:collapse;">
+          <tr><th style="text-align:left; padding:4px">Field</th><th style="text-align:left; padding:4px">${a.genericName}</th><th style="text-align:left; padding:4px">${b.genericName}</th></tr>
+          <tr><td style="padding:4px"><strong>Class</strong></td><td style="padding:4px">${a.drugClass}</td><td style="padding:4px">${b.drugClass}</td></tr>
+          <tr><td style="padding:4px"><strong>Form</strong></td><td style="padding:4px">${a.form}</td><td style="padding:4px">${b.form}</td></tr>
+          <tr><td style="padding:4px"><strong>Storage</strong></td><td style="padding:4px">${a.storage}</td><td style="padding:4px">${b.storage}</td></tr>
+          <tr><td style="padding:4px"><strong>Schedule</strong></td><td style="padding:4px">${fmtSched(a)}</td><td style="padding:4px">${fmtSched(b)}</td></tr>
+        </table>
+      `;
+    };
+
+    selA.addEventListener('change', renderTable);
+    selB.addEventListener('change', renderTable);
+    renderTable();
     this.modalEl.querySelector('#modal-cancel-btn')?.addEventListener('click', () => this.closeModal());
   }
 
