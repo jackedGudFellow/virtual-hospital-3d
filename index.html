@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Interactive 3D Virtual Hospital</title>
+  </head>
+  <body>
+    <div id="loading-screen" role="status" aria-live="polite">
+      <div class="loading-card">
+        <div class="loading-title">Virtual Hospital 3D</div>
+        <div class="loading-status" id="loading-status">Initializing 3D engine...</div>
+        <div class="loading-bar-track"><div class="loading-bar-fill" id="loading-bar"></div></div>
+      </div>
+    </div>
+    <div id="app">
+      <div id="canvas-container" aria-label="3D Virtual Hospital Viewport"></div>
+      <div id="hud-root"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

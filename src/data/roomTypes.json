@@ -1,0 +1,296 @@
+{
+  "lobby": {
+    "name": "Main Lobby",
+    "department": "main",
+    "description": "Primary hospital entrance hall connecting reception, waiting areas, lifts, and public pharmacy.",
+    "equipment": ["Information kiosk", "Seating benches", "Digital directory", "Hand sanitizer station"]
+  },
+  "reception": {
+    "name": "Reception",
+    "department": "main",
+    "description": "Patient check-in, registration, and visitor guidance desk.",
+    "equipment": ["Reception desk", "Workstations", "Queue ticket dispenser"]
+  },
+  "waiting": {
+    "name": "Waiting Area",
+    "department": "main",
+    "description": "Comfortable seating zone for patients and accompanying visitors.",
+    "equipment": ["Waiting chairs", "Display monitor", "Water dispenser"]
+  },
+  "cafeteria": {
+    "name": "Cafeteria",
+    "department": "main",
+    "description": "Dining area serving visitors, patients, and hospital staff.",
+    "equipment": ["Dining tables", "Serving counter", "Beverage station"]
+  },
+  "kitchen": {
+    "name": "Kitchen",
+    "department": "main",
+    "description": "Food preparation and meal distribution kitchen supporting the cafeteria and wards.",
+    "equipment": ["Prep counters", "Commercial ovens", "Refrigeration units"]
+  },
+  "toilet": {
+    "name": "Restrooms",
+    "department": "main",
+    "description": "Accessible public and patient restroom facilities.",
+    "equipment": ["Accessible stalls", "Washbasins", "Hand dryers"]
+  },
+  "pharmacy-dispensing": {
+    "name": "Pharmacy — Dispensing",
+    "department": "pharmacy",
+    "description": "Public-facing hospital pharmacy with dispensing window, counseling nook, and medication cabinets.",
+    "equipment": ["Dispensing counter", "2 Workstations", "Label printer", "Cold-chain refrigerator", "Controlled-drug cabinet"]
+  },
+  "pharmacy-storage": {
+    "name": "Pharmacy — Storage",
+    "department": "pharmacy",
+    "description": "Back-of-house bulk medication storage, cold room, narcotics safe, and receiving area.",
+    "equipment": ["Floor-to-ceiling shelving", "IV fluid pallet racks", "Cold room", "Narcotics safe", "Pass-through hatch"]
+  },
+  "or": {
+    "name": "Operating Room",
+    "department": "surgery",
+    "description": "Sterile surgical suite equipped for operative procedures.",
+    "equipment": ["Operating table", "Surgical lights", "Anesthesia machine", "Patient monitor"]
+  },
+  "pre-op": {
+    "name": "Pre-Operative Bay",
+    "department": "surgery",
+    "description": "Patient preparation and assessment area prior to surgery.",
+    "equipment": ["Patient stretcher", "Vital signs monitor", "IV stand"]
+  },
+  "post-op": {
+    "name": "Post-Operative Recovery",
+    "department": "surgery",
+    "description": "Post-anesthesia care unit (PACU) for close monitoring after surgery.",
+    "equipment": ["Recovery beds", "Multiparameter monitors", "Oxygen outlets"]
+  },
+  "scrub-up": {
+    "name": "Scrub-Up",
+    "department": "surgery",
+    "description": "Surgical hand-washing and gowning station adjacent to operating rooms.",
+    "equipment": ["Scrub sinks", "Antiseptic dispensers", "Gown racks"]
+  },
+  "anesthesia": {
+    "name": "Anesthesia Room",
+    "department": "surgery",
+    "description": "Anesthesia induction and equipment preparation room.",
+    "equipment": ["Anesthesia cart", "Airway management kit", "Gas outlets"]
+  },
+  "mri": {
+    "name": "MRI Suite",
+    "department": "surgery",
+    "description": "Magnetic Resonance Imaging room with RF shielding.",
+    "equipment": ["MRI scanner", "Patient table", "RF coils"]
+  },
+  "control-room": {
+    "name": "Imaging Control Room",
+    "department": "surgery",
+    "description": "Shielded operator station overlooking the MRI/CT suite.",
+    "equipment": ["Operator console", "Diagnostic monitors", "Intercom"]
+  },
+  "sterilization": {
+    "name": "Sterilization",
+    "department": "sterilization",
+    "description": "Central sterile services for decontamination, washing, packaging, and sterile storage.",
+    "equipment": ["Autoclave sterilizers", "Washer-disinfectors", "Sterile racks"]
+  },
+  "icu": {
+    "name": "Intensive Care Unit (ICU)",
+    "department": "icu",
+    "description": "High-acuity critical care ward with continuous physiological monitoring.",
+    "equipment": ["ICU beds", "Ventilators", "Infusion pumps", "Central nursing station"]
+  },
+  "isolation": {
+    "name": "Isolation Room",
+    "department": "icu",
+    "description": "Negative/positive pressure isolation room with anteroom air lock.",
+    "equipment": ["Isolation bed", "HEPA filtration", "Anteroom sink", "Monitor"]
+  },
+  "changing": {
+    "name": "Staff Changing / Lockers",
+    "department": "icu",
+    "description": "Male and female staff locker and scrub-changing rooms.",
+    "equipment": ["Lockers", "Benches", "Scrub dispenser"]
+  },
+  "doctor-office": {
+    "name": "Doctor's Office",
+    "department": "admin",
+    "description": "Clinical consultation and charting office for attending physicians.",
+    "equipment": ["Desk", "Workstation", "Exam chair", "Reference shelving"]
+  },
+  "meeting": {
+    "name": "Meeting Room",
+    "department": "admin",
+    "description": "Multidisciplinary team conference and case-review room.",
+    "equipment": ["Conference table", "Chairs", "Presentation display"]
+  },
+  "nursery": {
+    "name": "Nursery",
+    "department": "nursery",
+    "description": "Pediatric and newborn observation and care unit.",
+    "equipment": ["Infant bassinets", "Warming table", "Nurse workstation"]
+  },
+  "chemo-bay": {
+    "name": "Chemotherapy Infusion Bay",
+    "department": "chemo",
+    "description": "Outpatient chemotherapy infusion area with reclining chairs and nursing counter.",
+    "equipment": ["Chemo recliners", "IV infusion poles", "Side tables", "Nurse counter"]
+  },
+  "cytotoxic-prep": {
+    "name": "Cytotoxic Drug Preparation",
+    "department": "chemo",
+    "description": "Cleanroom satellite pharmacy for preparing hazardous chemotherapy infusions.",
+    "equipment": ["Biological safety cabinet", "Pass-through hatch", "PPE station"]
+  },
+  "ar-activity": {
+    "name": "Augmented Reality Activity",
+    "department": "ar",
+    "description": "Interactive AR/VR rehabilitation and patient-engagement space.",
+    "equipment": ["AR/VR headsets", "Motion sensors", "Display wall"]
+  },
+  "tech-support": {
+    "name": "Technical Support Room",
+    "department": "ar",
+    "description": "Equipment maintenance and calibration room for AR/VR systems.",
+    "equipment": ["Workbench", "Server rack", "Charging dock"]
+  },
+  "services": {
+    "name": "Services & Mechanical",
+    "department": "services",
+    "description": "Hospital infrastructure: HVAC, electrical, IT, clean/dirty utilities, linen, and archive.",
+    "equipment": ["Mechanical panels", "Utility racks", "Storage shelving"]
+  },
+  "corridor": {
+    "name": "Corridor",
+    "department": "circulation",
+    "description": "Internal hospital circulation corridor.",
+    "equipment": ["Wayfinding signage", "Handrails", "Emergency lighting"]
+  },
+  "lift-stair": {
+    "name": "Lifts & Stairwell",
+    "department": "circulation",
+    "description": "Vertical circulation core connecting all hospital floors.",
+    "equipment": ["Passenger & bed lifts", "Fire-rated stairs"]
+  },
+  "courtyard": {
+    "name": "Courtyard",
+    "department": "main",
+    "description": "Open-air landscaped lightwell providing daylight to surrounding wings.",
+    "equipment": ["Planters", "Outdoor seating"]
+  },
+  "bmt-isolation": {
+    "name": "BMT Isolation Room",
+    "department": "bmt",
+    "description": "Positive-pressure bone marrow transplant isolation room with anteroom and private balcony.",
+    "equipment": ["BMT bed", "HEPA filter unit", "Anteroom sink", "Vital signs monitor"]
+  },
+  "bmt-ward": {
+    "name": "BMT Inpatient Ward",
+    "department": "bmt",
+    "description": "Autologous or allogeneic bone marrow transplant inpatient ward.",
+    "equipment": ["Hospital beds", "Infusion pumps", "Patient monitors"]
+  },
+  "activities-hall": {
+    "name": "Activities & Recreation Hall",
+    "department": "activities",
+    "description": "Multi-purpose hall, music, video, and play space for patients and families.",
+    "equipment": ["Seating", "Media screen", "Activity tables"]
+  },
+  "kids-room": {
+    "name": "Kids Play Room",
+    "department": "activities",
+    "description": "Child-friendly recreation and play therapy room.",
+    "equipment": ["Play mats", "Toy shelving", "Kids tables"]
+  },
+  "classroom": {
+    "name": "Educational Classroom",
+    "department": "education",
+    "description": "Hospital schoolroom and patient/family treatment education classroom.",
+    "equipment": ["Desks", "Whiteboard", "Teaching display"]
+  },
+  "psych-therapy": {
+    "name": "Psychological Therapy Room",
+    "department": "psychology",
+    "description": "Quiet counseling room for consultation, group therapy, or one-to-one support.",
+    "equipment": ["Therapy armchairs", "Side table", "Acoustic panels"]
+  },
+  "hydrotherapy": {
+    "name": "Hydrotherapy Suite",
+    "department": "physio",
+    "description": "Therapeutic warm-water rehabilitation pool and changing area.",
+    "equipment": ["Hydrotherapy pool", "Patient hoist", "Safety rails"]
+  },
+  "physio-room": {
+    "name": "Physiotherapy & Rehab",
+    "department": "physio",
+    "description": "Physical therapy, massage, and mobility rehabilitation room.",
+    "equipment": ["Treatment plinth", "Parallel bars", "Exercise mats"]
+  },
+  "ophthalmic": {
+    "name": "Orthopedic / Ophthalmic Clinic",
+    "department": "physio",
+    "description": "Specialized outpatient examination room for orthopedic and ophthalmic care.",
+    "equipment": ["Exam chair", "Diagnostic lamp", "Vision chart", "Desk"]
+  },
+  "ward-single": {
+    "name": "Single Inpatient Ward",
+    "department": "inpatient",
+    "description": "Private single-bed inpatient room with en-suite bathroom and corridor entry.",
+    "equipment": ["Hospital bed", "Bedside cabinet", "Monitor", "Headwall", "Guest chair"]
+  },
+  "ward-double": {
+    "name": "Double Inpatient Ward",
+    "department": "inpatient",
+    "description": "Two-bed inpatient room with privacy divider, monitors, and en-suite bathroom.",
+    "equipment": ["2 Hospital beds", "2 Bedside cabinets", "Monitors", "Headwalls"]
+  },
+  "nurse-station": {
+    "name": "Nurse Station",
+    "department": "inpatient",
+    "description": "Central nursing hub overlooking inpatient bays with charting workstations.",
+    "equipment": ["4 Workstations", "Medication cart", "Call-bell console"]
+  },
+  "nicu-ward": {
+    "name": "NICU 8-Bay Open Ward",
+    "department": "nursery",
+    "description": "Neonatal Intensive Care open ward with 8 numbered bays in two columns.",
+    "equipment": ["8 Incubators/cots", "Neonatal monitors", "Ventilators", "Supply carts"]
+  },
+  "nicu-isolation": {
+    "name": "NICU Isolation Room",
+    "department": "nursery",
+    "description": "Dedicated neonatal isolation bay accessed through a shared air lock.",
+    "equipment": ["Incubator", "Ventilator", "Vital signs monitor"]
+  },
+  "nicu-station": {
+    "name": "NICU Nurse Station",
+    "department": "nursery",
+    "description": "Central neonatal intensive care nursing station with 4 charting workstations.",
+    "equipment": ["4 Workstations", "Central telemetry monitor", "Emergency cart"]
+  },
+  "milk-prep": {
+    "name": "Breast-Feeding & Milk Prep",
+    "department": "nursery",
+    "description": "Hygienic neonatal milk preparation, pasteurization, and feeding room.",
+    "equipment": ["Milk refrigerator", "Prep counter", "Bottle warmer", "Sink"]
+  },
+  "med-gas": {
+    "name": "Medical Gas Room",
+    "department": "services",
+    "description": "Dedicated medical air compressor and vacuum manifold room for NICU.",
+    "equipment": ["Air compressors", "Vacuum pumps", "Gas manifold"]
+  },
+  "air-lock": {
+    "name": "Air Lock",
+    "department": "circulation",
+    "description": "Pressurized anteroom air lock maintaining clean/isolation zone separation.",
+    "equipment": ["Interlocking doors", "Pressure gauge", "Hand sanitizer"]
+  },
+  "staff-room": {
+    "name": "Staff Lounge",
+    "department": "admin",
+    "description": "Rest and break room for clinical unit staff.",
+    "equipment": ["Table", "Chairs", "Kitchenette"]
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "hospital-bed": {
+    "name": "Hospital Inpatient Bed",
+    "category": "Patient Care",
+    "description": "Adjustable electric medical bed with side rails and head/foot elevation for patient comfort and clinical access."
+  },
+  "bedside-cabinet": {
+    "name": "Bedside Cabinet",
+    "category": "Ward Furniture",
+    "description": "Lockable patient storage cabinet with an integrated over-bed dining and chart tray."
+  },
+  "patient-monitor": {
+    "name": "Multiparameter Patient Monitor",
+    "category": "Monitoring",
+    "description": "Displays continuous vital signs including ECG, SpO2, non-invasive blood pressure, and respiratory rate."
+  },
+  "headwall": {
+    "name": "Medical Headwall Unit",
+    "category": "Infrastructure",
+    "description": "Wall-mounted panel providing oxygen, medical air, vacuum outlets, nurse-call, and power sockets."
+  },
+  "incubator": {
+    "name": "Neonatal Incubator",
+    "category": "NICU",
+    "description": "Enclosed temperature- and humidity-controlled micro-environment protecting premature or ill newborns."
+  },
+  "ventilator": {
+    "name": "Mechanical Ventilator",
+    "category": "Critical Care",
+    "description": "Delivers controlled oxygen and positive-pressure breaths to patients needing respiratory support."
+  },
+  "iv-pole": {
+    "name": "IV Infusion Pole & Pump",
+    "category": "Infusion",
+    "description": "Mobile stand holding intravenous fluid bags and precision volumetric infusion pumps."
+  },
+  "chemo-recliner": {
+    "name": "Chemotherapy Infusion Recliner",
+    "category": "Oncology",
+    "description": "Ergonomic reclining chair designed for multi-hour outpatient chemotherapy and biologic infusions."
+  },
+  "operating-table": {
+    "name": "Surgical Operating Table",
+    "category": "Surgery",
+    "description": "Electro-hydraulic radiolucent table with articulated sections for surgical positioning."
+  },
+  "surgical-lights": {
+    "name": "Ceiling Surgical Lights",
+    "category": "Surgery",
+    "description": "Dual shadow-free LED surgical booms providing high-intensity cool illumination of the operative field."
+  },
+  "anesthesia-machine": {
+    "name": "Anesthesia Workstation",
+    "category": "Surgery",
+    "description": "Integrates gas delivery, vaporizers, ventilator, and airway monitoring during general anesthesia."
+  },
+  "mri-gantry": {
+    "name": "MRI Scanner Gantry",
+    "category": "Diagnostic Imaging",
+    "description": "High-field superconducting magnet bore and motorized patient table for non-invasive cross-sectional imaging."
+  },
+  "control-console": {
+    "name": "Imaging Control Console",
+    "category": "Diagnostic Imaging",
+    "description": "Shielded operator workstation behind lead glass for running scan protocols and reviewing images."
+  },
+  "autoclave": {
+    "name": "Steam Autoclave Sterilizer",
+    "category": "Sterilization",
+    "description": "High-pressure steam sterilizer used to decontaminate surgical instruments and sterile packs."
+  },
+  "biosafety-cabinet": {
+    "name": "Cytotoxic Biosafety Cabinet",
+    "category": "Oncology Pharmacy",
+    "description": "Negative-pressure HEPA-filtered isolator protecting staff while compounding hazardous chemotherapy drugs."
+  },
+  "nurse-workstation": {
+    "name": "Nursing Charting Workstation",
+    "category": "Clinical IT",
+    "description": "Clinical desk with dual monitors for electronic health records, central telemetry, and medication orders."
+  },
+  "reception-desk": {
+    "name": "Reception & Check-In Counter",
+    "category": "Main Spaces",
+    "description": "Front-desk counter for patient registration, appointment check-in, and visitor wayfinding."
+  },
+  "waiting-chairs": {
+    "name": "Waiting Area Seating",
+    "category": "Main Spaces",
+    "description": "Cleanable beam-mounted seating rows for patients and accompanying family members."
+  },
+  "cafeteria-table": {
+    "name": "Cafeteria Dining Set",
+    "category": "Main Spaces",
+    "description": "Four-seat dining table and chairs serving visitors, staff, and ambulatory patients."
+  },
+  "medical-gas-manifold": {
+    "name": "Medical Gas Compressor & Vacuum",
+    "category": "Infrastructure",
+    "description": "Centralized medical air compressors, vacuum pumps, and pressure-monitoring manifold."
+  },
+  "milk-fridge": {
+    "name": "Milk & Formula Refrigerator",
+    "category": "NICU",
+    "description": "Temperature-monitored medical refrigerator for safe storage of expressed breast milk and infant formula."
+  },
+  "exam-bed": {
+    "name": "Clinical Examination Couch",
+    "category": "Outpatient",
+    "description": "Padded examination table with adjustable backrest for outpatient physical assessments."
+  },
+  "sink": {
+    "name": "Clinical Hand-Wash Sink",
+    "category": "Infection Control",
+    "description": "Hands-free clinical washbasin with soap and antiseptic dispensers for infection prevention."
+  },
+  "hepa-unit": {
+    "name": "HEPA Air Filtration Unit",
+    "category": "Isolation",
+    "description": "High-efficiency particulate air unit maintaining positive or negative pressure differentials in isolation rooms."
+  },
+  "vr-station": {
+    "name": "AR / VR Rehabilitation Pod",
+    "category": "Rehabilitation",
+    "description": "Interactive motion-tracking and virtual-reality station for pediatric engagement and motor therapy."
+  },
+  "hydro-pool": {
+    "name": "Hydrotherapy Rehabilitation Pool",
+    "category": "Physiotherapy",
+    "description": "Temperature-controlled therapeutic pool with safety rails for low-impact musculoskeletal rehab."
+  },
+  "physio-plinth": {
+    "name": "Physiotherapy Treatment Plinth",
+    "category": "Physiotherapy",
+    "description": "Wide padded therapy table used for manual physiotherapy, stretching, and massage."
+  },
+  "conference-table": {
+    "name": "Conference & Meeting Table",
+    "category": "Administration",
+    "description": "Large collaborative table for multidisciplinary clinical rounds, education, and hospital meetings."
+  },
+  "office-desk": {
+    "name": "Clinical Office Desk",
+    "category": "Administration",
+    "description": "Workstation desk with computer monitor and guest chairs for physician consultations and charting."
+  },
+  "locker-bank": {
+    "name": "Staff Scrub Lockers",
+    "category": "Staff Support",
+    "description": "Ventilated personal storage lockers for clinical staff changing into surgical or ICU scrubs."
+  },
+  "utility-rack": {
+    "name": "Stainless Utility & Supply Rack",
+    "category": "Services",
+    "description": "Modular wire shelving for organizing clean linen, sterile supplies, or mechanical equipment."
+  }
+}

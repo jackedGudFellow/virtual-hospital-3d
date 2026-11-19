@@ -1,0 +1,1189 @@
+{
+  "building": {
+    "name": "Medical City Oncology & General Hospital",
+    "floorHeight": 3.8,
+    "wallHeight": 3.5,
+    "slabThickness": 0.3,
+    "originOffset": [-28, -30]
+  },
+  "departments": {
+    "main": { "name": "Main Spaces", "floorColor": "#dceef8", "accentColor": "#0284c7" },
+    "pharmacy": { "name": "Pharmacy", "floorColor": "#d1fae5", "accentColor": "#059669" },
+    "surgery": { "name": "Surgery Department", "floorColor": "#fee2e2", "accentColor": "#dc2626" },
+    "sterilization": { "name": "Sterilization", "floorColor": "#fef3c7", "accentColor": "#d97706" },
+    "icu": { "name": "Intensive Care Unit", "floorColor": "#ffe4e6", "accentColor": "#e11d48" },
+    "chemo": { "name": "Chemotherapy", "floorColor": "#ede9fe", "accentColor": "#7c3aed" },
+    "nursery": { "name": "Nursery / NICU", "floorColor": "#fce7f3", "accentColor": "#db2777" },
+    "ar": { "name": "Augmented Reality", "floorColor": "#cffafe", "accentColor": "#0891b2" },
+    "admin": { "name": "Administration", "floorColor": "#e0e7ff", "accentColor": "#4f46e5" },
+    "services": { "name": "Services & Mechanical", "floorColor": "#e2e8f0", "accentColor": "#475569" },
+    "circulation": { "name": "Corridors & Cores", "floorColor": "#f1f5f9", "accentColor": "#64748b" },
+    "bmt": { "name": "Bone Marrow Transplant", "floorColor": "#fae8ff", "accentColor": "#a21caf" },
+    "activities": { "name": "Activities & Recreation", "floorColor": "#fef9c3", "accentColor": "#ca8a04" },
+    "education": { "name": "Education", "floorColor": "#ffedd5", "accentColor": "#ea580c" },
+    "psychology": { "name": "Psychology", "floorColor": "#f3e8ff", "accentColor": "#9333ea" },
+    "physio": { "name": "Physiotherapy & Rehab", "floorColor": "#ccfbf1", "accentColor": "#0d9488" },
+    "inpatient": { "name": "Inpatient Wards", "floorColor": "#e0f2fe", "accentColor": "#0369a1" }
+  },
+  "floors": [
+    {
+      "id": "L1",
+      "level": 1,
+      "name": "First Floor (Ground)",
+      "footprint": [
+        { "x": 0, "z": 0, "w": 18, "d": 22 },
+        { "x": 18, "z": 16, "w": 14, "d": 6 },
+        { "x": 32, "z": 0, "w": 24, "d": 22 },
+        { "x": 0, "z": 22, "w": 56, "d": 38 }
+      ],
+      "rooms": [
+        {
+          "id": "L1.admin.meeting",
+          "name": "Meeting Room",
+          "type": "meeting",
+          "department": "admin",
+          "bounds": { "x": 0, "z": 0, "w": 6, "d": 7 },
+          "doors": [{ "wall": "E", "offset": 3.0, "width": 1.2 }],
+          "windows": [{ "wall": "N", "offset": 1.5, "width": 3.0 }]
+        },
+        {
+          "id": "L1.admin.doctor-1",
+          "name": "Doctor's Office",
+          "type": "doctor-office",
+          "department": "admin",
+          "bounds": { "x": 0, "z": 7, "w": 6, "d": 5 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 1.0 }],
+          "windows": [{ "wall": "W", "offset": 1.5, "width": 2.0 }]
+        },
+        {
+          "id": "L1.services.archive",
+          "name": "Archive",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 0, "z": 12, "w": 6, "d": 5 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 1.0 }]
+        },
+        {
+          "id": "L1.services.it",
+          "name": "IT & Camera Room",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 0, "z": 17, "w": 6, "d": 5 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 1.0 }]
+        },
+        {
+          "id": "L1.circulation.nw-corridor",
+          "name": "NW Wing Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 6, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L1.ar.activity",
+          "name": "AR Activity Room",
+          "type": "ar-activity",
+          "department": "ar",
+          "bounds": { "x": 9, "z": 0, "w": 9, "d": 10 },
+          "doors": [{ "wall": "W", "offset": 4.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 2.5, "width": 4.5 }]
+        },
+        {
+          "id": "L1.ar.tech-support",
+          "name": "AR Technical Support",
+          "type": "tech-support",
+          "department": "ar",
+          "bounds": { "x": 9, "z": 10, "w": 9, "d": 6 },
+          "doors": [{ "wall": "W", "offset": 2.2, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 2.5 }]
+        },
+        {
+          "id": "L1.services.hvac",
+          "name": "HVAC & Mechanical",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 9, "z": 16, "w": 9, "d": 6 },
+          "doors": [{ "wall": "W", "offset": 2.2, "width": 1.4 }]
+        },
+        {
+          "id": "L1.main.courtyard",
+          "name": "North Courtyard",
+          "type": "courtyard",
+          "department": "main",
+          "bounds": { "x": 18, "z": 0, "w": 14, "d": 16 },
+          "ceiling": false
+        },
+        {
+          "id": "L1.circulation.core-north",
+          "name": "North Lifts & Stairwell",
+          "type": "lift-stair",
+          "department": "circulation",
+          "bounds": { "x": 18, "z": 16, "w": 14, "d": 6 },
+          "doors": [{ "wall": "S", "offset": 5.5, "width": 3.0 }],
+          "windows": [{ "wall": "N", "offset": 4.0, "width": 6.0 }]
+        },
+        {
+          "id": "L1.nursery.main",
+          "name": "Nursery",
+          "type": "nursery",
+          "department": "nursery",
+          "bounds": { "x": 32, "z": 0, "w": 8, "d": 10 },
+          "doors": [{ "wall": "E", "offset": 4.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.5, "width": 4.5 }]
+        },
+        {
+          "id": "L1.icu.changing-f",
+          "name": "Female Changing Room",
+          "type": "changing",
+          "department": "icu",
+          "bounds": { "x": 32, "z": 10, "w": 8, "d": 4 },
+          "doors": [{ "wall": "E", "offset": 1.4, "width": 1.0 }]
+        },
+        {
+          "id": "L1.icu.changing-m",
+          "name": "Male Changing Room",
+          "type": "changing",
+          "department": "icu",
+          "bounds": { "x": 32, "z": 14, "w": 8, "d": 4 },
+          "doors": [{ "wall": "E", "offset": 1.4, "width": 1.0 }]
+        },
+        {
+          "id": "L1.services.linen",
+          "name": "Linen & Clean Utility",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 32, "z": 18, "w": 8, "d": 4 },
+          "doors": [{ "wall": "E", "offset": 1.4, "width": 1.1 }]
+        },
+        {
+          "id": "L1.circulation.ne-corridor",
+          "name": "NE Wing Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 40, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L1.icu.main",
+          "name": "Intensive Care Unit (ICU)",
+          "type": "icu",
+          "department": "icu",
+          "bounds": { "x": 43, "z": 0, "w": 13, "d": 11 },
+          "doors": [{ "wall": "W", "offset": 4.5, "width": 1.8 }],
+          "windows": [{ "wall": "N", "offset": 2.5, "width": 7.0 }]
+        },
+        {
+          "id": "L1.icu.isolation",
+          "name": "ICU Isolation Room",
+          "type": "isolation",
+          "department": "icu",
+          "bounds": { "x": 43, "z": 11, "w": 7, "d": 6 },
+          "doors": [{ "wall": "W", "offset": 2.2, "width": 1.2 }]
+        },
+        {
+          "id": "L1.icu.doctor-office",
+          "name": "ICU Doctor's Office",
+          "type": "doctor-office",
+          "department": "admin",
+          "bounds": { "x": 50, "z": 11, "w": 6, "d": 6 },
+          "doors": [{ "wall": "S", "offset": 2.2, "width": 1.0 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 2.5 }]
+        },
+        {
+          "id": "L1.services.dirty-util",
+          "name": "Dirty Utility & Waste",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 43, "z": 17, "w": 13, "d": 5 },
+          "doors": [{ "wall": "W", "offset": 1.8, "width": 1.2 }]
+        },
+        {
+          "id": "L1.circulation.spine-main",
+          "name": "Central Spine Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 22, "w": 56, "d": 4 },
+          "windows": [
+            { "wall": "W", "offset": 0.8, "width": 2.4 },
+            { "wall": "E", "offset": 0.8, "width": 2.4 }
+          ]
+        },
+        {
+          "id": "L1.surgery.or-1",
+          "name": "Operating Room 1",
+          "type": "or",
+          "department": "surgery",
+          "bounds": { "x": 0, "z": 26, "w": 9, "d": 8 },
+          "doors": [{ "wall": "E", "offset": 3.0, "width": 1.8 }]
+        },
+        {
+          "id": "L1.surgery.or-2",
+          "name": "Operating Room 2",
+          "type": "or",
+          "department": "surgery",
+          "bounds": { "x": 0, "z": 34, "w": 9, "d": 8 },
+          "doors": [{ "wall": "E", "offset": 3.0, "width": 1.8 }]
+        },
+        {
+          "id": "L1.surgery.scrub",
+          "name": "Scrub-Up",
+          "type": "scrub-up",
+          "department": "surgery",
+          "bounds": { "x": 9, "z": 26, "w": 4, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 1.2, "width": 1.4 }]
+        },
+        {
+          "id": "L1.surgery.anesthesia",
+          "name": "Anesthesia Room",
+          "type": "anesthesia",
+          "department": "surgery",
+          "bounds": { "x": 9, "z": 34, "w": 4, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 1.2, "width": 1.4 }]
+        },
+        {
+          "id": "L1.surgery.pre-op",
+          "name": "Pre-Operative Bay",
+          "type": "pre-op",
+          "department": "surgery",
+          "bounds": { "x": 13, "z": 26, "w": 7, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 2.5, "width": 1.8 }]
+        },
+        {
+          "id": "L1.surgery.post-op",
+          "name": "Post-Operative Recovery",
+          "type": "post-op",
+          "department": "surgery",
+          "bounds": { "x": 13, "z": 34, "w": 8, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 3.0, "width": 1.8 }]
+        },
+        {
+          "id": "L1.surgery.mri",
+          "name": "MRI Suite",
+          "type": "mri",
+          "department": "surgery",
+          "bounds": { "x": 20, "z": 26, "w": 8, "d": 9 },
+          "doors": [{ "wall": "N", "offset": 3.0, "width": 1.6 }]
+        },
+        {
+          "id": "L1.surgery.control",
+          "name": "MRI Control Room",
+          "type": "control-room",
+          "department": "surgery",
+          "bounds": { "x": 21, "z": 35, "w": 7, "d": 7 },
+          "doors": [{ "wall": "S", "offset": 2.5, "width": 1.2 }]
+        },
+        {
+          "id": "L1.sterilization.dirty",
+          "name": "Sterilization — Wash & Pack",
+          "type": "sterilization",
+          "department": "sterilization",
+          "bounds": { "x": 28, "z": 26, "w": 7, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 2.5, "width": 1.4 }]
+        },
+        {
+          "id": "L1.sterilization.clean",
+          "name": "Sterilization — Sterile Storage",
+          "type": "sterilization",
+          "department": "sterilization",
+          "bounds": { "x": 28, "z": 34, "w": 7, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 2.5, "width": 1.4 }]
+        },
+        {
+          "id": "L1.services.electricity",
+          "name": "Electricity & Technical",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 35, "z": 26, "w": 7, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 2.5, "width": 1.2 }]
+        },
+        {
+          "id": "L1.services.equipment",
+          "name": "Equipment Storage",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 35, "z": 34, "w": 7, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 2.5, "width": 1.2 }]
+        },
+        {
+          "id": "L1.pharmacy.storage",
+          "name": "Pharmacy — Storage Room",
+          "type": "pharmacy-storage",
+          "department": "pharmacy",
+          "bounds": { "x": 42, "z": 26, "w": 14, "d": 9 },
+          "doors": [
+            { "wall": "N", "offset": 6.0, "width": 1.4 },
+            { "wall": "S", "offset": 6.0, "width": 1.0, "targetRoom": "L1.chemo.cytotoxic-prep" }
+          ]
+        },
+        {
+          "id": "L1.chemo.cytotoxic-prep",
+          "name": "Cytotoxic Drug Preparation",
+          "type": "cytotoxic-prep",
+          "department": "chemo",
+          "bounds": { "x": 42, "z": 35, "w": 14, "d": 7 },
+          "doors": [{ "wall": "S", "offset": 6.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 3.0 }]
+        },
+        {
+          "id": "L1.circulation.spine-south",
+          "name": "South Spine Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 42, "w": 56, "d": 4 },
+          "windows": [
+            { "wall": "W", "offset": 0.8, "width": 2.4 },
+            { "wall": "E", "offset": 0.8, "width": 2.4 }
+          ]
+        },
+        {
+          "id": "L1.chemo.bay",
+          "name": "Chemotherapy Infusion Bay",
+          "type": "chemo-bay",
+          "department": "chemo",
+          "bounds": { "x": 0, "z": 46, "w": 16, "d": 14 },
+          "doors": [
+            { "wall": "N", "offset": 7.0, "width": 1.8 },
+            { "wall": "E", "offset": 8.0, "width": 1.8 }
+          ],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 10.0 }]
+        },
+        {
+          "id": "L1.main.toilets",
+          "name": "Public Restrooms",
+          "type": "toilet",
+          "department": "main",
+          "bounds": { "x": 16, "z": 46, "w": 8, "d": 5 },
+          "doors": [{ "wall": "N", "offset": 3.2, "width": 1.4 }]
+        },
+        {
+          "id": "L1.chemo.waiting",
+          "name": "Chemo Waiting & Sub-Reception",
+          "type": "waiting",
+          "department": "chemo",
+          "bounds": { "x": 16, "z": 51, "w": 8, "d": 9 },
+          "doors": [{ "wall": "E", "offset": 4.0, "width": 1.8 }],
+          "windows": [{ "wall": "S", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L1.main.reception",
+          "name": "Main Reception",
+          "type": "reception",
+          "department": "main",
+          "bounds": { "x": 24, "z": 46, "w": 7, "d": 6 },
+          "doors": [
+            { "wall": "N", "offset": 2.5, "width": 1.8 },
+            { "wall": "S", "offset": 2.5, "width": 2.0 }
+          ]
+        },
+        {
+          "id": "L1.main.waiting",
+          "name": "Main Waiting Area",
+          "type": "waiting",
+          "department": "main",
+          "bounds": { "x": 31, "z": 46, "w": 7, "d": 6 },
+          "doors": [
+            { "wall": "N", "offset": 2.5, "width": 1.8 },
+            { "wall": "S", "offset": 2.0, "width": 3.0 }
+          ]
+        },
+        {
+          "id": "L1.main.lobby",
+          "name": "Main Lobby & Entrance",
+          "type": "lobby",
+          "department": "main",
+          "bounds": { "x": 24, "z": 52, "w": 14, "d": 8 },
+          "doors": [
+            { "wall": "S", "offset": 4.5, "width": 4.5 },
+            { "wall": "E", "offset": 3.0, "width": 2.4 }
+          ],
+          "windows": [
+            { "wall": "S", "offset": 0.8, "width": 3.0 },
+            { "wall": "S", "offset": 10.0, "width": 3.0 }
+          ]
+        },
+        {
+          "id": "L1.pharmacy.dispensing",
+          "name": "Pharmacy — Dispensing",
+          "type": "pharmacy-dispensing",
+          "department": "pharmacy",
+          "bounds": { "x": 38, "z": 46, "w": 9, "d": 14 },
+          "doors": [
+            { "wall": "N", "offset": 3.5, "width": 1.4 },
+            { "wall": "W", "offset": 9.0, "width": 2.4 }
+          ],
+          "windows": [{ "wall": "S", "offset": 2.0, "width": 5.0 }]
+        },
+        {
+          "id": "L1.main.cafeteria",
+          "name": "Cafeteria",
+          "type": "cafeteria",
+          "department": "main",
+          "bounds": { "x": 47, "z": 46, "w": 9, "d": 9 },
+          "doors": [{ "wall": "N", "offset": 3.5, "width": 1.8 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 5.0 }]
+        },
+        {
+          "id": "L1.main.kitchen",
+          "name": "Kitchen",
+          "type": "kitchen",
+          "department": "main",
+          "bounds": { "x": 47, "z": 55, "w": 9, "d": 5 },
+          "doors": [{ "wall": "N", "offset": 3.5, "width": 1.2 }]
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "level": 2,
+      "name": "Second Floor (BMT, Activities & NICU Wing)",
+      "footprint": [
+        { "x": 0, "z": 0, "w": 18, "d": 22 },
+        { "x": 18, "z": 16, "w": 14, "d": 6 },
+        { "x": 32, "z": 0, "w": 24, "d": 22 },
+        { "x": 0, "z": 22, "w": 56, "d": 38 },
+        { "x": 56, "z": 0, "w": 26, "d": 16 }
+      ],
+      "rooms": [
+        {
+          "id": "L2.bmt.autologous",
+          "name": "BMT Autologous Inpatient Ward",
+          "type": "bmt-ward",
+          "department": "bmt",
+          "bounds": { "x": 0, "z": 0, "w": 6, "d": 12 },
+          "doors": [{ "wall": "E", "offset": 5.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 8.0 }]
+        },
+        {
+          "id": "L2.bmt.allogeneic",
+          "name": "BMT Allogeneic Inpatient Ward",
+          "type": "bmt-ward",
+          "department": "bmt",
+          "bounds": { "x": 0, "z": 12, "w": 6, "d": 10 },
+          "doors": [{ "wall": "E", "offset": 4.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 6.0 }]
+        },
+        {
+          "id": "L2.circulation.nw-corridor",
+          "name": "L2 NW Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 6, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L2.bmt.isolation-1",
+          "name": "BMT Isolation Room 1",
+          "type": "bmt-isolation",
+          "department": "bmt",
+          "bounds": { "x": 9, "z": 0, "w": 9, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L2.bmt.isolation-2",
+          "name": "BMT Isolation Room 2",
+          "type": "bmt-isolation",
+          "department": "bmt",
+          "bounds": { "x": 9, "z": 7, "w": 9, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L2.bmt.pharmacy-sat",
+          "name": "BMT Satellite Pharmacy",
+          "type": "pharmacy-dispensing",
+          "department": "pharmacy",
+          "bounds": { "x": 9, "z": 14, "w": 9, "d": 8 },
+          "doors": [{ "wall": "W", "offset": 3.0, "width": 1.2 }]
+        },
+        {
+          "id": "L2.main.courtyard",
+          "name": "Courtyard Void",
+          "type": "courtyard",
+          "department": "main",
+          "bounds": { "x": 18, "z": 0, "w": 14, "d": 16 },
+          "ceiling": false
+        },
+        {
+          "id": "L2.circulation.core-north",
+          "name": "North Lifts & Stairwell",
+          "type": "lift-stair",
+          "department": "circulation",
+          "bounds": { "x": 18, "z": 16, "w": 14, "d": 6 },
+          "doors": [{ "wall": "S", "offset": 5.5, "width": 3.0 }],
+          "windows": [{ "wall": "N", "offset": 4.0, "width": 6.0 }]
+        },
+        {
+          "id": "L2.bmt.or",
+          "name": "BMT Operation Room",
+          "type": "or",
+          "department": "bmt",
+          "bounds": { "x": 32, "z": 0, "w": 8, "d": 10 },
+          "doors": [{ "wall": "E", "offset": 4.0, "width": 1.6 }]
+        },
+        {
+          "id": "L2.bmt.post-op",
+          "name": "BMT Post-Operation",
+          "type": "post-op",
+          "department": "bmt",
+          "bounds": { "x": 32, "z": 10, "w": 8, "d": 6 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 1.4 }]
+        },
+        {
+          "id": "L2.bmt.sterile",
+          "name": "BMT Sterile Storage",
+          "type": "sterilization",
+          "department": "bmt",
+          "bounds": { "x": 32, "z": 16, "w": 8, "d": 6 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 1.2 }]
+        },
+        {
+          "id": "L2.circulation.ne-corridor",
+          "name": "L2 NE Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 40, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L2.nursery.main",
+          "name": "L2 Nursery",
+          "type": "nursery",
+          "department": "nursery",
+          "bounds": { "x": 43, "z": 0, "w": 13, "d": 10 },
+          "doors": [
+            { "wall": "W", "offset": 4.0, "width": 1.4 },
+            { "wall": "E", "offset": 4.0, "width": 2.0 }
+          ],
+          "windows": [{ "wall": "N", "offset": 3.0, "width": 7.0 }]
+        },
+        {
+          "id": "L2.admin.meeting",
+          "name": "L2 Clinical Meeting Room",
+          "type": "meeting",
+          "department": "admin",
+          "bounds": { "x": 43, "z": 10, "w": 13, "d": 6 },
+          "doors": [{ "wall": "W", "offset": 2.2, "width": 1.2 }]
+        },
+        {
+          "id": "L2.services.utilities",
+          "name": "L2 Clean & Dirty Utilities",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 43, "z": 16, "w": 13, "d": 6 },
+          "doors": [{ "wall": "W", "offset": 2.2, "width": 1.2 }]
+        },
+        {
+          "id": "L2.circulation.spine-main",
+          "name": "L2 Central Spine Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 22, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L2.ar.vr-activity",
+          "name": "VR / Mixed Reality Activity",
+          "type": "ar-activity",
+          "department": "ar",
+          "bounds": { "x": 0, "z": 26, "w": 18, "d": 16 },
+          "doors": [{ "wall": "N", "offset": 8.0, "width": 2.0 }],
+          "windows": [{ "wall": "W", "offset": 4.0, "width": 8.0 }]
+        },
+        {
+          "id": "L2.activities.hall",
+          "name": "Single-Purpose Activities Hall",
+          "type": "activities-hall",
+          "department": "activities",
+          "bounds": { "x": 18, "z": 26, "w": 20, "d": 16 },
+          "doors": [
+            { "wall": "N", "offset": 8.0, "width": 2.4 },
+            { "wall": "S", "offset": 8.0, "width": 2.4 }
+          ]
+        },
+        {
+          "id": "L2.activities.music",
+          "name": "Music & Video Area",
+          "type": "activities-hall",
+          "department": "activities",
+          "bounds": { "x": 38, "z": 26, "w": 18, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 8.0, "width": 1.6 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L2.activities.kids",
+          "name": "Kids & Playing Room",
+          "type": "kids-room",
+          "department": "activities",
+          "bounds": { "x": 38, "z": 34, "w": 18, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 8.0, "width": 1.6 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L2.circulation.spine-south",
+          "name": "L2 South Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 42, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L2.activities.conference",
+          "name": "L2 Conference Room",
+          "type": "meeting",
+          "department": "activities",
+          "bounds": { "x": 0, "z": 46, "w": 24, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 10.0, "width": 2.2 }],
+          "windows": [{ "wall": "S", "offset": 4.0, "width": 14.0 }]
+        },
+        {
+          "id": "L2.main.lobby",
+          "name": "L2 Floor Lobby & Waiting",
+          "type": "waiting",
+          "department": "main",
+          "bounds": { "x": 24, "z": 46, "w": 18, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 7.5, "width": 2.4 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 12.0 }]
+        },
+        {
+          "id": "L2.services.mechanical",
+          "name": "L2 Services & Archive",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 42, "z": 46, "w": 14, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 6.0, "width": 1.4 }]
+        },
+        {
+          "id": "L2.nicu.upper-shaft",
+          "name": "NICU Upper Floor Connection Shaft",
+          "type": "lift-stair",
+          "department": "circulation",
+          "bounds": { "x": 56, "z": 0, "w": 4, "d": 4 },
+          "doors": [{ "wall": "S", "offset": 1.0, "width": 1.8 }]
+        },
+        {
+          "id": "L2.nicu.conn-corridor",
+          "name": "NICU Connection Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 56, "z": 4, "w": 4, "d": 12 },
+          "doors": [{ "wall": "E", "offset": 2.0, "width": 2.0 }]
+        },
+        {
+          "id": "L2.nicu.med-gas",
+          "name": "NICU Medical Gas Room",
+          "type": "med-gas",
+          "department": "services",
+          "bounds": { "x": 60, "z": 0, "w": 5, "d": 3 },
+          "doors": [{ "wall": "S", "offset": 1.5, "width": 1.0 }]
+        },
+        {
+          "id": "L2.nicu.dirty-util",
+          "name": "NICU Dirty Utility",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 65, "z": 0, "w": 5, "d": 3 },
+          "doors": [{ "wall": "S", "offset": 1.5, "width": 1.0 }]
+        },
+        {
+          "id": "L2.nicu.wcs",
+          "name": "NICU WCs & Lockers",
+          "type": "changing",
+          "department": "nursery",
+          "bounds": { "x": 70, "z": 0, "w": 7, "d": 4 },
+          "doors": [{ "wall": "S", "offset": 2.5, "width": 1.2 }]
+        },
+        {
+          "id": "L2.nicu.airlock-2",
+          "name": "NICU Entry Air Lock",
+          "type": "air-lock",
+          "department": "circulation",
+          "bounds": { "x": 77, "z": 0, "w": 5, "d": 4 },
+          "doors": [{ "wall": "S", "offset": 1.5, "width": 1.4 }]
+        },
+        {
+          "id": "L2.nicu.iso-1",
+          "name": "NICU Isolation Room 1",
+          "type": "nicu-isolation",
+          "department": "nursery",
+          "bounds": { "x": 60, "z": 3, "w": 4, "d": 5 },
+          "doors": [{ "wall": "E", "offset": 1.8, "width": 1.1 }]
+        },
+        {
+          "id": "L2.nicu.airlock-1",
+          "name": "NICU Isolation Air Lock",
+          "type": "air-lock",
+          "department": "circulation",
+          "bounds": { "x": 64, "z": 3, "w": 2, "d": 5 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 1.2 }]
+        },
+        {
+          "id": "L2.nicu.iso-2",
+          "name": "NICU Isolation Room 2",
+          "type": "nicu-isolation",
+          "department": "nursery",
+          "bounds": { "x": 66, "z": 3, "w": 4, "d": 5 },
+          "doors": [{ "wall": "W", "offset": 1.8, "width": 1.1 }]
+        },
+        {
+          "id": "L2.nicu.nurse-station",
+          "name": "NICU Nurse Station (4 Workstations)",
+          "type": "nicu-station",
+          "department": "nursery",
+          "bounds": { "x": 70, "z": 4, "w": 7, "d": 4 },
+          "doors": [{ "wall": "S", "offset": 2.0, "width": 3.0 }]
+        },
+        {
+          "id": "L2.nicu.milk-prep",
+          "name": "Breast-Feeding & Milk Prep",
+          "type": "milk-prep",
+          "department": "nursery",
+          "bounds": { "x": 77, "z": 4, "w": 5, "d": 4 },
+          "doors": [{ "wall": "W", "offset": 1.4, "width": 1.0 }]
+        },
+        {
+          "id": "L2.nicu.open-ward",
+          "name": "NICU 8-Bay Open Ward",
+          "type": "nicu-ward",
+          "department": "nursery",
+          "bounds": { "x": 60, "z": 8, "w": 17, "d": 8 },
+          "windows": [{ "wall": "S", "offset": 2.0, "width": 13.0 }]
+        },
+        {
+          "id": "L2.nicu.staff-room",
+          "name": "NICU Staff Room & Store",
+          "type": "staff-room",
+          "department": "admin",
+          "bounds": { "x": 77, "z": 8, "w": 5, "d": 8 },
+          "doors": [{ "wall": "W", "offset": 3.0, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 4.0 }]
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "level": 3,
+      "name": "Third Floor (Admin, Education, Psychology & Physio)",
+      "footprint": [
+        { "x": 0, "z": 0, "w": 18, "d": 22 },
+        { "x": 18, "z": 16, "w": 14, "d": 6 },
+        { "x": 32, "z": 0, "w": 24, "d": 22 },
+        { "x": 0, "z": 22, "w": 56, "d": 38 }
+      ],
+      "rooms": [
+        {
+          "id": "L3.admin.manager",
+          "name": "Hospital Manager & Secretary",
+          "type": "doctor-office",
+          "department": "admin",
+          "bounds": { "x": 0, "z": 0, "w": 6, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.2 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 6.0 }]
+        },
+        {
+          "id": "L3.admin.finance-legal",
+          "name": "Accountant & Legal Office",
+          "type": "doctor-office",
+          "department": "admin",
+          "bounds": { "x": 0, "z": 11, "w": 6, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.2 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 6.0 }]
+        },
+        {
+          "id": "L3.circulation.nw-corridor",
+          "name": "L3 NW Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 6, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L3.admin.conference",
+          "name": "Executive Conference Hall",
+          "type": "meeting",
+          "department": "admin",
+          "bounds": { "x": 9, "z": 0, "w": 9, "d": 14 },
+          "doors": [{ "wall": "W", "offset": 6.0, "width": 1.6 }],
+          "windows": [{ "wall": "N", "offset": 1.5, "width": 6.0 }]
+        },
+        {
+          "id": "L3.admin.vip-waiting",
+          "name": "VIP & Staff Waiting Lounge",
+          "type": "waiting",
+          "department": "admin",
+          "bounds": { "x": 9, "z": 14, "w": 9, "d": 8 },
+          "doors": [{ "wall": "W", "offset": 3.0, "width": 1.4 }]
+        },
+        {
+          "id": "L3.main.courtyard",
+          "name": "Courtyard Void",
+          "type": "courtyard",
+          "department": "main",
+          "bounds": { "x": 18, "z": 0, "w": 14, "d": 16 },
+          "ceiling": false
+        },
+        {
+          "id": "L3.circulation.core-north",
+          "name": "North Lifts & Stairwell",
+          "type": "lift-stair",
+          "department": "circulation",
+          "bounds": { "x": 18, "z": 16, "w": 14, "d": 6 },
+          "doors": [{ "wall": "S", "offset": 5.5, "width": 3.0 }],
+          "windows": [{ "wall": "N", "offset": 4.0, "width": 6.0 }]
+        },
+        {
+          "id": "L3.education.treatment-class",
+          "name": "Class for Treatment Education",
+          "type": "classroom",
+          "department": "education",
+          "bounds": { "x": 32, "z": 0, "w": 8, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.4 }]
+        },
+        {
+          "id": "L3.education.children-class",
+          "name": "Class for Children",
+          "type": "classroom",
+          "department": "education",
+          "bounds": { "x": 32, "z": 11, "w": 8, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.4 }]
+        },
+        {
+          "id": "L3.circulation.ne-corridor",
+          "name": "L3 NE Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 40, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L3.physio.orthopedic",
+          "name": "Orthopedic & Ophthalmic Suite",
+          "type": "ophthalmic",
+          "department": "physio",
+          "bounds": { "x": 43, "z": 0, "w": 13, "d": 12 },
+          "doors": [{ "wall": "W", "offset": 5.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 7.0 }]
+        },
+        {
+          "id": "L3.services.l3-util",
+          "name": "L3 Services & Storage",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 43, "z": 12, "w": 13, "d": 10 },
+          "doors": [{ "wall": "W", "offset": 4.0, "width": 1.2 }]
+        },
+        {
+          "id": "L3.circulation.spine-main",
+          "name": "L3 Central Spine Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 22, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L3.psychology.group",
+          "name": "Group Therapy & Consultation",
+          "type": "psych-therapy",
+          "department": "psychology",
+          "bounds": { "x": 0, "z": 26, "w": 18, "d": 16 },
+          "doors": [{ "wall": "N", "offset": 8.0, "width": 1.6 }],
+          "windows": [{ "wall": "W", "offset": 3.0, "width": 9.0 }]
+        },
+        {
+          "id": "L3.psychology.eating-body",
+          "name": "Eating Disorder & Body-Image Therapy",
+          "type": "psych-therapy",
+          "department": "psychology",
+          "bounds": { "x": 18, "z": 26, "w": 19, "d": 16 },
+          "doors": [{ "wall": "N", "offset": 8.5, "width": 1.6 }]
+        },
+        {
+          "id": "L3.psychology.one-to-one",
+          "name": "One-to-One Counseling Suite",
+          "type": "psych-therapy",
+          "department": "psychology",
+          "bounds": { "x": 37, "z": 26, "w": 19, "d": 16 },
+          "doors": [{ "wall": "S", "offset": 8.5, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 3.0, "width": 9.0 }]
+        },
+        {
+          "id": "L3.circulation.spine-south",
+          "name": "L3 South Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 42, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L3.physio.hydrotherapy",
+          "name": "Hydrotherapy Pool Suite",
+          "type": "hydrotherapy",
+          "department": "physio",
+          "bounds": { "x": 0, "z": 46, "w": 20, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 9.0, "width": 2.0 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 12.0 }]
+        },
+        {
+          "id": "L3.physio.massage",
+          "name": "Physiotherapy & Massage",
+          "type": "physio-room",
+          "department": "physio",
+          "bounds": { "x": 20, "z": 46, "w": 20, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 9.0, "width": 1.8 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 12.0 }]
+        },
+        {
+          "id": "L3.physio.consultant",
+          "name": "Physiotherapy Consultant & Storage",
+          "type": "doctor-office",
+          "department": "physio",
+          "bounds": { "x": 40, "z": 46, "w": 16, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 7.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 3.0, "width": 8.0 }]
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "level": 4,
+      "name": "Fourth Floor (Typical Inpatient)",
+      "footprint": [
+        { "x": 0, "z": 0, "w": 18, "d": 22 },
+        { "x": 18, "z": 16, "w": 14, "d": 6 },
+        { "x": 32, "z": 0, "w": 24, "d": 22 },
+        { "x": 0, "z": 22, "w": 56, "d": 38 }
+      ],
+      "rooms": [
+        {
+          "id": "L4.inpatient.single-1",
+          "name": "Single Inpatient Ward 1",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 0, "w": 6, "d": 7 },
+          "doors": [{ "wall": "E", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "W", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L4.inpatient.single-2",
+          "name": "Single Inpatient Ward 2",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 7, "w": 6, "d": 7 },
+          "doors": [{ "wall": "E", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "W", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L4.inpatient.double-1",
+          "name": "Double Inpatient Ward 1",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 14, "w": 6, "d": 8 },
+          "doors": [{ "wall": "E", "offset": 3.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 1.5, "width": 4.5 }]
+        },
+        {
+          "id": "L4.circulation.nw-corridor",
+          "name": "NW Ward Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 6, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L4.inpatient.single-3",
+          "name": "Single Inpatient Ward 3",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 9, "z": 0, "w": 9, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L4.inpatient.single-4",
+          "name": "Single Inpatient Ward 4",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 9, "z": 7, "w": 9, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 3.5 }]
+        },
+        {
+          "id": "L4.inpatient.double-2",
+          "name": "Double Inpatient Ward 2",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 9, "z": 14, "w": 9, "d": 8 },
+          "doors": [{ "wall": "W", "offset": 3.0, "width": 1.4 }]
+        },
+        {
+          "id": "L4.main.courtyard",
+          "name": "Courtyard Void",
+          "type": "courtyard",
+          "department": "main",
+          "bounds": { "x": 18, "z": 0, "w": 14, "d": 16 },
+          "ceiling": false
+        },
+        {
+          "id": "L4.circulation.core-north",
+          "name": "North Lifts & Stairwell",
+          "type": "lift-stair",
+          "department": "circulation",
+          "bounds": { "x": 18, "z": 16, "w": 14, "d": 6 },
+          "doors": [{ "wall": "S", "offset": 5.5, "width": 3.0 }],
+          "windows": [{ "wall": "N", "offset": 4.0, "width": 6.0 }]
+        },
+        {
+          "id": "L4.inpatient.double-3",
+          "name": "Double Inpatient Ward 3",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 32, "z": 0, "w": 8, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 5.0 }]
+        },
+        {
+          "id": "L4.inpatient.double-4",
+          "name": "Double Inpatient Ward 4",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 32, "z": 11, "w": 8, "d": 11 },
+          "doors": [{ "wall": "E", "offset": 4.5, "width": 1.4 }]
+        },
+        {
+          "id": "L4.circulation.ne-corridor",
+          "name": "NE Ward Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 40, "z": 0, "w": 3, "d": 22 },
+          "doors": [{ "wall": "S", "offset": 0.4, "width": 2.2 }]
+        },
+        {
+          "id": "L4.inpatient.single-5",
+          "name": "Single Inpatient Ward 5",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 43, "z": 0, "w": 13, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 4.0 }]
+        },
+        {
+          "id": "L4.inpatient.single-6",
+          "name": "Single Inpatient Ward 6",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 43, "z": 7, "w": 13, "d": 7 },
+          "doors": [{ "wall": "W", "offset": 2.5, "width": 1.2 }],
+          "windows": [{ "wall": "E", "offset": 1.5, "width": 4.0 }]
+        },
+        {
+          "id": "L4.services.ward-util",
+          "name": "Ward Clean & Dirty Utility",
+          "type": "services",
+          "department": "services",
+          "bounds": { "x": 43, "z": 14, "w": 13, "d": 8 },
+          "doors": [{ "wall": "W", "offset": 3.0, "width": 1.2 }]
+        },
+        {
+          "id": "L4.circulation.spine-main",
+          "name": "Central Ward Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 22, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L4.inpatient.nurse-station",
+          "name": "Central Ward Nurse Station",
+          "type": "nurse-station",
+          "department": "inpatient",
+          "bounds": { "x": 18, "z": 26, "w": 20, "d": 16 },
+          "doors": [
+            { "wall": "N", "offset": 8.5, "width": 3.0 },
+            { "wall": "S", "offset": 8.5, "width": 3.0 }
+          ]
+        },
+        {
+          "id": "L4.inpatient.double-5",
+          "name": "Double Inpatient Ward 5",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 26, "w": 18, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 8.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L4.inpatient.double-6",
+          "name": "Double Inpatient Ward 6",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 34, "w": 18, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 8.0, "width": 1.4 }],
+          "windows": [{ "wall": "W", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L4.inpatient.double-7",
+          "name": "Double Inpatient Ward 7",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 38, "z": 26, "w": 18, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 8.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L4.inpatient.double-8",
+          "name": "Double Inpatient Ward 8",
+          "type": "ward-double",
+          "department": "inpatient",
+          "bounds": { "x": 38, "z": 34, "w": 18, "d": 8 },
+          "doors": [{ "wall": "S", "offset": 8.0, "width": 1.4 }],
+          "windows": [{ "wall": "E", "offset": 2.0, "width": 4.0 }]
+        },
+        {
+          "id": "L4.circulation.spine-south",
+          "name": "South Ward Corridor",
+          "type": "corridor",
+          "department": "circulation",
+          "bounds": { "x": 0, "z": 42, "w": 56, "d": 4 }
+        },
+        {
+          "id": "L4.inpatient.single-7",
+          "name": "Single Inpatient Ward 7",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 0, "z": 46, "w": 14, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 6.0, "width": 1.2 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 8.0 }]
+        },
+        {
+          "id": "L4.inpatient.single-8",
+          "name": "Single Inpatient Ward 8",
+          "type": "ward-single",
+          "department": "inpatient",
+          "bounds": { "x": 14, "z": 46, "w": 14, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 6.0, "width": 1.2 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 8.0 }]
+        },
+        {
+          "id": "L4.inpatient.lounge",
+          "name": "Inpatient Family Lounge",
+          "type": "waiting",
+          "department": "inpatient",
+          "bounds": { "x": 28, "z": 46, "w": 14, "d": 14 },
+          "doors": [{ "wall": "N", "offset": 6.0, "width": 2.0 }],
+          "windows": [{ "wall": "S", "offset": 3.0, "width": 8.0 }]
+        },
+        {
+          "id": "L4.main.roof-garden",
+          "name": "Terrace Garden",
+          "type": "courtyard",
+          "department": "main",
+          "bounds": { "x": 42, "z": 46, "w": 14, "d": 14 },
+          "ceiling": false
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "level": 5,
+      "name": "Fifth Floor (Typical Inpatient)",
+      "templateFrom": "L4",
+      "footprint": [],
+      "rooms": []
+    }
+  ]
+}
