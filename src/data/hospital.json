@@ -261,7 +261,7 @@
           "name": "MRI Suite",
           "type": "mri",
           "department": "surgery",
-          "bounds": { "x": 20, "z": 26, "w": 8, "d": 9 },
+          "bounds": { "x": 20, "z": 26, "w": 8, "d": 8 },
           "doors": [{ "wall": "N", "offset": 3.0, "width": 1.6 }]
         },
         {
@@ -269,7 +269,7 @@
           "name": "MRI Control Room",
           "type": "control-room",
           "department": "surgery",
-          "bounds": { "x": 21, "z": 35, "w": 7, "d": 7 },
+          "bounds": { "x": 21, "z": 34, "w": 7, "d": 8 },
           "doors": [{ "wall": "S", "offset": 2.5, "width": 1.2 }]
         },
         {
@@ -305,24 +305,24 @@
           "doors": [{ "wall": "S", "offset": 2.5, "width": 1.2 }]
         },
         {
-          "id": "L1.pharmacy.storage",
-          "name": "Pharmacy — Storage Room",
-          "type": "pharmacy-storage",
-          "department": "pharmacy",
-          "bounds": { "x": 42, "z": 26, "w": 14, "d": 9 },
-          "doors": [
-            { "wall": "N", "offset": 6.0, "width": 1.4 },
-            { "wall": "S", "offset": 6.0, "width": 1.0, "targetRoom": "L1.chemo.cytotoxic-prep" }
-          ]
-        },
-        {
           "id": "L1.chemo.cytotoxic-prep",
           "name": "Cytotoxic Drug Preparation",
           "type": "cytotoxic-prep",
           "department": "chemo",
-          "bounds": { "x": 42, "z": 35, "w": 14, "d": 7 },
-          "doors": [{ "wall": "S", "offset": 6.0, "width": 1.4 }],
+          "bounds": { "x": 42, "z": 26, "w": 14, "d": 8 },
+          "doors": [{ "wall": "N", "offset": 6.0, "width": 1.4 }],
           "windows": [{ "wall": "E", "offset": 2.0, "width": 3.0 }]
+        },
+        {
+          "id": "L1.pharmacy.storage",
+          "name": "Pharmacy — Storage Room",
+          "type": "pharmacy-storage",
+          "department": "pharmacy",
+          "bounds": { "x": 42, "z": 34, "w": 14, "d": 8 },
+          "doors": [
+            { "wall": "N", "offset": 6.0, "width": 1.0, "targetRoom": "L1.chemo.cytotoxic-prep" },
+            { "wall": "S", "offset": 1.5, "width": 1.4, "targetRoom": "L1.circulation.spine-south" }
+          ]
         },
         {
           "id": "L1.circulation.spine-south",
@@ -408,8 +408,8 @@
           "department": "pharmacy",
           "bounds": { "x": 38, "z": 46, "w": 9, "d": 14 },
           "doors": [
-            { "wall": "N", "offset": 3.5, "width": 1.4 },
-            { "wall": "W", "offset": 9.0, "width": 2.4 }
+            { "wall": "N", "offset": 5.5, "width": 1.4, "targetRoom": "L1.circulation.spine-south" },
+            { "wall": "W", "offset": 9.0, "width": 2.4, "targetRoom": "L1.main.lobby" }
           ],
           "windows": [{ "wall": "S", "offset": 2.0, "width": 5.0 }]
         },
@@ -892,7 +892,10 @@
           "type": "psych-therapy",
           "department": "psychology",
           "bounds": { "x": 18, "z": 26, "w": 19, "d": 16 },
-          "doors": [{ "wall": "N", "offset": 8.5, "width": 1.6 }]
+          "doors": [
+            { "wall": "N", "offset": 8.5, "width": 1.6, "targetRoom": "L3.circulation.spine-main" },
+            { "wall": "S", "offset": 8.5, "width": 1.6, "targetRoom": "L3.circulation.spine-south" }
+          ]
         },
         {
           "id": "L3.psychology.one-to-one",
