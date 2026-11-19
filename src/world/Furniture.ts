@@ -113,6 +113,27 @@ export class Furniture {
       case 'physio-plinth':
         this.buildBed(g, true);
         break;
+      case 'privacy-curtain':
+        this.buildPrivacyCurtain(g);
+        break;
+      case 'toilet-fixture':
+        this.buildToilet(g);
+        break;
+      case 'side-table':
+        this.buildSideTable(g);
+        break;
+      case 'balcony-rail':
+        this.buildBalconyRail(g);
+        break;
+      case 'glass-partition':
+        this.buildGlassPartition(g);
+        break;
+      case 'lead-glass-window':
+        this.buildLeadGlass(g);
+        break;
+      case 'sluice-sink':
+        this.buildSluiceSink(g);
+        break;
       case 'locker-bank':
       case 'utility-rack':
       default:
@@ -323,5 +344,61 @@ export class Furniture {
     );
     rack.position.y = 0.925;
     g.add(rack);
+  }
+
+  private static buildPrivacyCurtain(g: THREE.Group): void {
+    const curtain = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 2.1, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0xbae6fd, roughness: 0.9 }),
+    );
+    curtain.position.y = 1.25;
+    g.add(curtain);
+  }
+
+  private static buildToilet(g: THREE.Group): void {
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.55), matWhite);
+    base.position.y = 0.21;
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.48, 0.18), matWhite);
+    tank.position.set(0, 0.58, -0.2);
+    g.add(base, tank);
+  }
+
+  private static buildSideTable(g: THREE.Group): void {
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.05, 0.45), matWood);
+    top.position.y = 0.58;
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.14, 0.56, 8), matSteel);
+    leg.position.y = 0.28;
+    g.add(top, leg);
+  }
+
+  private static buildBalconyRail(g: THREE.Group): void {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.05, 2.6), matGlass);
+    rail.position.y = 0.525;
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.06, 2.65), matSteel);
+    cap.position.y = 1.08;
+    g.add(rail, cap);
+  }
+
+  private static buildGlassPartition(g: THREE.Group): void {
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.4, 2.4), matGlass);
+    wall.position.y = 1.2;
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 2.45), matSteel);
+    frame.position.y = 2.42;
+    g.add(wall, frame);
+  }
+
+  private static buildLeadGlass(g: THREE.Group): void {
+    const pane = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8, 1.0, 0.12),
+      new THREE.MeshStandardMaterial({ color: 0x0f768a, transparent: true, opacity: 0.55, roughness: 0.15 }),
+    );
+    pane.position.y = 1.45;
+    g.add(pane);
+  }
+
+  private static buildSluiceSink(g: THREE.Group): void {
+    const unit = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.88, 0.6), matSteel);
+    unit.position.y = 0.44;
+    g.add(unit);
   }
 }

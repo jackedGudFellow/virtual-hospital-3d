@@ -53,19 +53,31 @@ export class InteriorBuilder {
         place('patient-monitor', cx - 1.3, cz - 0.7, 0);
         place('headwall', cx - 0.5, z + 0.2, 0);
         place('sink', x + w - 0.7, z + d - 0.6, 0);
+        place('toilet-fixture', x + w - 1.4, z + d - 0.6, 0);
         break;
 
       case 'ward-double':
         place('hospital-bed', x + w * 0.3, cz, 0);
         place('bedside-cabinet', x + w * 0.3 + 0.9, cz - 0.6, 0);
         place('patient-monitor', x + w * 0.3 - 0.9, cz - 0.7, 0);
+        place('privacy-curtain', cx, cz, 0);
         place('hospital-bed', x + w * 0.72, cz, 0);
         place('bedside-cabinet', x + w * 0.72 + 0.9, cz - 0.6, 0);
         place('headwall', x + w * 0.5, z + 0.2, 0);
         place('sink', x + 0.7, z + d - 0.6, 0);
+        place('toilet-fixture', x + 1.5, z + d - 0.6, 0);
         break;
 
       case 'bmt-isolation':
+        // Drawing B isometric: anteroom glass partition, HEPA, bed, monitor, small balcony
+        place('glass-partition', x + 2.2, cz, 0);
+        place('sink', x + 0.9, z + d - 0.8, 0);
+        place('hepa-unit', x + 0.8, z + 0.8, 0);
+        place('hospital-bed', cx + 0.8, cz, 0);
+        place('patient-monitor', cx - 0.1, cz - 0.7, 0);
+        place('balcony-rail', x + w - 0.5, cz, 0);
+        break;
+
       case 'isolation':
         place('hospital-bed', cx + 0.5, cz, 0);
         place('patient-monitor', cx - 0.4, cz - 0.7, 0);
@@ -74,21 +86,26 @@ export class InteriorBuilder {
         break;
 
       case 'ophthalmic':
-        place('exam-bed', cx - 1.2, cz, 0);
-        place('office-desk', cx + 1.5, cz - 0.5, -Math.PI / 2);
+        // Drawing B Clinic isometric: exam bed, desk, sink, privacy curtain
+        place('exam-bed', cx - 1.4, cz, 0);
+        place('privacy-curtain', cx, cz, 0);
+        place('office-desk', cx + 1.8, cz - 0.5, -Math.PI / 2);
         place('sink', x + 0.7, z + 0.6, 0);
         break;
 
       case 'mri':
         place('mri-gantry', cx, cz - 0.4, 0);
         place('patient-monitor', cx + 1.8, cz + 0.5, 0);
+        place('lead-glass-window', cx, z + d - 0.18, 0);
         break;
 
       case 'control-room':
         place('control-console', cx, z + 1.2, 0);
+        place('lead-glass-window', cx, z + 0.18, 0);
         break;
 
       case 'chemo-bay': {
+        // Drawing B Chemotherapy chair place: recliner + IV pole + side table
         const cols = 4;
         const rows = 2;
         for (let r = 0; r < rows; r += 1) {
@@ -97,6 +114,7 @@ export class InteriorBuilder {
             const pz = z + 3.2 + r * 4.5;
             place('chemo-recliner', px, pz, 0);
             place('iv-pole', px + 0.8, pz - 0.3, 0);
+            place('side-table', px - 0.75, pz, 0);
           }
         }
         place('nurse-workstation', cx, z + d - 1.5, 0);
@@ -123,8 +141,11 @@ export class InteriorBuilder {
         break;
 
       case 'nicu-station':
-        place('nurse-workstation', cx - 1.5, cz, 0);
-        place('nurse-workstation', cx + 1.5, cz, 0);
+        // Drawing A: 4 nursing workstations at the NICU central station
+        place('nurse-workstation', x + 1.4, z + 1.3, 0);
+        place('nurse-workstation', x + 4.8, z + 1.3, 0);
+        place('nurse-workstation', x + 1.4, z + 2.8, Math.PI);
+        place('nurse-workstation', x + 4.8, z + 2.8, Math.PI);
         break;
 
       case 'milk-prep':
@@ -247,7 +268,10 @@ export class InteriorBuilder {
 
       case 'services':
       case 'anesthesia':
-        place('utility-rack', cx, cz, 0);
+        place('utility-rack', cx - 0.8, cz, 0);
+        if (room.id.includes('dirty')) {
+          place('sluice-sink', cx + 0.9, cz, 0);
+        }
         break;
 
       case 'corridor':
