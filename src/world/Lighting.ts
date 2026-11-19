@@ -38,6 +38,10 @@ export class Lighting {
     scene.add(this.group);
   }
 
+  setShadowsEnabled(enabled: boolean): void {
+    this.sunLight.castShadow = enabled;
+  }
+
   setNightMode(night: boolean, scene: THREE.Scene): void {
     setWindowNightGlow(night);
     if (night) {

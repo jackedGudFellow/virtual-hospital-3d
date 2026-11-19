@@ -51,6 +51,7 @@ export class BuildingBuilder {
 
   constructor() {
     this.root.name = 'hospital-building';
+    this.root.userData.updateLabels = (camPos: THREE.Vector3) => this.updateLabelCulling(camPos);
   }
 
   build(data: HospitalData, drugs: DrugSpec[] = []): void {
@@ -179,7 +180,9 @@ export class BuildingBuilder {
         this.viewMode === 'isolate' &&
         id === this.isolatedFloorId;
       for (const lbl of rt.labels) {
-        lbl.visible = showLabels && !lbl.userData.isMinorLabel;
+        const allow = showLabels && !lbl.userData.isMinorLabel;
+        lbl.visible = allow;
+        lbl.element.style.display = allow ? '' : 'none';
       }
 
       const showCeilings = this.ceilingsVisible && this.viewMode === 'whole';
@@ -214,6 +217,37 @@ export class BuildingBuilder {
   setLabelsVisible(visible: boolean): void {
     this.labelsVisible = visible;
     this.applyFloorMode();
+  }
+
+  private updateLabelCulling(camPos: THREE.Vector3): void {
+    if (!this.labelsVisible || this.viewMode !== 'isolate' || !this.isolatedFloorId) {
+      return;
+    }
+    const rt = this.floors.get(this.isolatedFloorId);
+    if (!rt) return;
+
+    const fadeStart = 22;
+    const maxDist = 42;
+    const worldPos = new THREE.Vector3();
+
+    for (const lbl of rt.labels) {
+      if (lbl.userData.isMinorLabel) {
+        lbl.visible = false;
+        lbl.element.style.display = 'none';
+        continue;
+      }
+      lbl.getWorldPosition(worldPos);
+      const dist = camPos.distanceTo(worldPos);
+      if (dist > maxDist) {
+        lbl.visible = false;
+        lbl.element.style.display = 'none';
+      } else {
+        lbl.visible = true;
+        lbl.element.style.display = '';
+        const alpha = dist <= fadeStart ? 1 : Math.max(0.15, 1 - (dist - fadeStart) / (maxDist - fadeStart));
+        lbl.element.style.opacity = alpha.toFixed(2);
+      }
+    }
   }
 
   getFloorGroup(floorId: string): THREE.Group | undefined {

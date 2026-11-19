@@ -70,6 +70,7 @@ export interface AppEvents {
   'tour:step': { title: string | null; active: boolean };
   'camera:toggleWalk': Record<string, never>;
   'walk:goto': { x: number; y: number; z: number };
+  'engine:qualityChanged': { low: boolean };
 }
 
 /**
