@@ -1,6 +1,7 @@
 import { EventBus } from '../core/Events';
 import { IndexedRoom } from '../core/HospitalIndex';
 import { DepartmentSpec, RoomTypesMap } from '../core/HospitalTypes';
+import { onLangChange, t, tDept } from '../core/I18n';
 import { AppMode } from '../core/StateStore';
 
 export interface EquipmentEntry {
@@ -35,6 +36,9 @@ export class InfoPanel {
     this.departments = departments;
     this.roomTypes = roomTypes;
     this.equipmentMap = equipmentMap;
+    this.el.setAttribute('role', 'region');
+    this.el.setAttribute('aria-label', 'Room and equipment information');
+    onLangChange(() => this.render());
     this.render();
   }
 
@@ -61,11 +65,11 @@ export class InfoPanel {
           <span class="info-dept-badge" style="background:#f0fdfa; color:#0f768a; border-color:#0f768a">
             ${eq.category}
           </span>
-          <button type="button" class="info-close-btn" id="info-eq-close">← Room</button>
+          <button type="button" class="info-close-btn" id="info-eq-close">${t('backRoom')}</button>
         </div>
-        <h2 class="info-room-title">${eq.name}</h2>
+        <h2 class="info-room-title" dir="auto">${eq.name}</h2>
         <p class="info-room-desc">${eq.description}</p>
-        <div class="info-walk-hint">Click another object or press Esc to return</div>
+        <div class="info-walk-hint">${t('equipHint')}</div>
       `;
       this.el.querySelector('#info-eq-close')?.addEventListener('click', () => {
         this.bus.emit('item:select', { itemId: null, equipmentType: null });
@@ -91,18 +95,18 @@ export class InfoPanel {
     this.el.classList.remove('hidden');
     this.el.innerHTML = `
       <div class="info-panel-header">
-        <span class="info-dept-badge" style="background:${dept?.floorColor ?? '#eef'}; color:${dept?.accentColor ?? '#0f768a'}; border-color:${dept?.accentColor ?? '#0f768a'}">
-          ${floor.id} · ${dept?.name ?? room.department}
+        <span class="info-dept-badge" style="background:${dept?.floorColor ?? '#eef'}; color:#0f172a; border-color:${dept?.accentColor ?? '#0c6273'}">
+          <bdi>${floor.id}</bdi> · ${tDept(room.department, dept?.name ?? room.department)}
         </span>
-        <button type="button" class="info-close-btn" id="info-back-btn" title="Back (Esc)">← Back</button>
+        <button type="button" class="info-close-btn" id="info-back-btn" title="Back (Esc)">${t('back')}</button>
       </div>
-      <h2 class="info-room-title">${room.name}</h2>
-      <div class="info-room-meta">Area: <strong>${areaM2} m²</strong> · Type: ${typeInfo?.name ?? room.type}</div>
+      <h2 class="info-room-title" dir="auto">${room.name}</h2>
+      <div class="info-room-meta">${t('area')}: <strong><bdi>${areaM2} m²</bdi></strong> · ${t('type')}: ${typeInfo?.name ?? room.type}</div>
       <p class="info-room-desc">${typeInfo?.description ?? 'Hospital clinical and support space.'}</p>
       ${
         equipList
           ? `<div class="info-equip-section">
-              <div class="info-equip-title">Key Equipment</div>
+              <div class="info-equip-title">${t('keyEquipment')}</div>
               <ul class="info-equip-list">${equipList}</ul>
             </div>`
           : ''
@@ -110,9 +114,9 @@ export class InfoPanel {
       <div class="info-actions">
         ${
           isInside
-            ? `<button type="button" class="hud-btn active info-enter-btn" id="info-walk-toggle">Toggle Walk Mode (WASD)</button>
-               <div class="info-walk-hint">Orbit/Zoom freely or toggle Walk Mode to stroll across the floor · Esc to exit</div>`
-            : `<button type="button" class="hud-btn active info-enter-btn" id="info-enter-btn">Enter Room</button>`
+            ? `<button type="button" class="hud-btn active info-enter-btn" id="info-walk-toggle">${t('toggleWalk')}</button>
+               <div class="info-walk-hint">${t('walkHint')}</div>`
+            : `<button type="button" class="hud-btn active info-enter-btn" id="info-enter-btn">${t('enterRoom')}</button>`
         }
       </div>
     `;

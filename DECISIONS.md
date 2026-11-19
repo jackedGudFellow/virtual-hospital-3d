@@ -60,6 +60,12 @@
 - Added the read-only/navigation `window.__hospitalTest` hook gated strictly behind `?test=1` in `src/main.ts` as specified in Step 5 Task 2.
 - Added `.github/workflows/ci.yml` and updated `.github/workflows/deploy.yml` so GitHub Pages deploys only after `typecheck`, `build`, `qa`, `test:unit`, and `test:e2e` all pass.
 
+## Step 6: Accessibility & Full EN/AR i18n
+- Extracted UI strings and department names into `src/locales/en.json` and `src/locales/ar.json` with `localStorage` persistence (`vh3d.lang`), `<html lang dir>` switching, and a Vitest parity test (`tests/unit/i18n.test.ts`).
+- Isolated Latin drug names and numeric strengths with `<bdi dir="auto">` for clean RTL rendering.
+- Added ARIA landmarks (`role="region"`, `role="navigation"`, `role="dialog"`), `#sr-announcer` live announcements, modal focus return, arrow-key navigation on Pharmacy cabinet pills, `@media (prefers-reduced-motion: reduce)`, and `@axe-core/playwright` verification (`tests/e2e/a11y.spec.ts`).
+
+
 
 
 

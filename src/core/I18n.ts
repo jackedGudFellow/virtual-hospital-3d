@@ -1,58 +1,62 @@
+import enJson from '../locales/en.json';
+import arJson from '../locales/ar.json';
+
 export type LangCode = 'en' | 'ar';
 
-const DICT: Record<LangCode, Record<string, string>> = {
-  en: {
-    brandTitle: 'Virtual Hospital 3D',
-    brandSub: 'L1–L5 + NICU Wing · Click room for info · Double-click to enter',
-    whole: 'All',
-    exploded: 'Split',
-    tour: 'Guided Tour',
-    settings: 'Settings ▾',
-    day: 'Day',
-    night: 'Night',
-    soundOff: 'Sound: Off',
-    soundOn: 'Sound: On',
-    qualityHigh: 'Quality: High',
-    qualityLow: 'Quality: Low',
-    contrast: 'High Contrast',
-    langBtn: 'AR / عربي',
-    departments: 'Departments ▾',
-    searchPlaceholder: 'Search rooms (e.g. ICU, Pharmacy, NICU)...',
-    hint: 'Click: Select · Double-click: Enter · Esc: Back · ~: FPS',
-    qLobby: 'Lobby',
-    qPharmacy: 'Pharmacy',
-    qIcu: 'ICU',
-    qSurgery: 'Surgery',
-    qChemo: 'Chemo',
-    qNicu: 'NICU',
-  },
-  ar: {
-    brandTitle: 'المستشفى الافتراضي ثلاثي الأبعاد',
-    brandSub: 'الطوابق 1–5 + جناح الخدج · انقر للتفاصيل · نقرتان للدخول',
-    whole: 'الكل',
-    exploded: 'مفكك',
-    tour: 'جولة إرشادية',
-    settings: 'الإعدادات ▾',
-    day: 'نهار',
-    night: 'ليل',
-    soundOff: 'الصوت: إيقاف',
-    soundOn: 'الصوت: تشغيل',
-    qualityHigh: 'الجودة: عالية',
-    qualityLow: 'الجودة: منخفضة',
-    contrast: 'تباين عالٍ',
-    langBtn: 'EN / English',
-    departments: 'الأقسام ▾',
-    searchPlaceholder: 'ابحث عن غرفة (مثل: الصيدلية، العناية)...',
-    hint: 'نقر: تحديد · نقرتان: دخول · Esc: رجوع · ~: الإطارات',
-    qLobby: 'البهو',
-    qPharmacy: 'الصيدلية',
-    qIcu: 'العناية',
-    qSurgery: 'الجراحة',
-    qChemo: 'الكيماوي',
-    qNicu: 'الخدج',
-  },
+const LANG_KEY = 'vh3d.lang';
+const LOCALES: Record<LangCode, Record<string, string>> = {
+  en: enJson,
+  ar: arJson,
 };
 
-export function t(lang: LangCode, key: string): string {
-  return DICT[lang][key] ?? DICT.en[key] ?? key;
+let currentLang: LangCode = loadSavedLang();
+const listeners = new Set<(lang: LangCode) => void>();
+
+function loadSavedLang(): LangCode {
+  try {
+    const val = window.localStorage.getItem(LANG_KEY);
+    if (val === 'ar' || val === 'en') return val;
+  } catch {
+    // Ignore storage access errors
+  }
+  return 'en';
 }
+
+export function applyDocumentDirection(lang: LangCode = currentLang): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+}
+
+export function getLang(): LangCode {
+  return currentLang;
+}
+
+export function setLang(lang: LangCode): void {
+  currentLang = lang;
+  try {
+    window.localStorage.setItem(LANG_KEY, lang);
+  } catch {
+    // Ignore storage errors
+  }
+  applyDocumentDirection(lang);
+  for (const cb of listeners) cb(lang);
+}
+
+export function onLangChange(cb: (lang: LangCode) => void): () => void {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+export function t(langOrKey: LangCode | string, maybeKey?: string): string {
+  const lang: LangCode = maybeKey ? (langOrKey as LangCode) : currentLang;
+  const key = maybeKey ?? langOrKey;
+  return LOCALES[lang]?.[key] ?? LOCALES.en[key] ?? key;
+}
+
+export function tDept(deptKey: string, fallback: string): string {
+  const k = `dept_${deptKey}`;
+  return LOCALES[currentLang]?.[k] ?? fallback;
+}
+
+applyDocumentDirection(currentLang);
