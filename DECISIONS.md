@@ -76,6 +76,12 @@
 - **Isometric & NICU Interiors:** Rebuilt `bmt-isolation` (anteroom glass partition + private balcony rail + HEPA + sink), `ward-single`/`ward-double` (en-suite toilet + sink + privacy curtain), `ophthalmic` clinic (exam bed + privacy curtain + desk + sink), `mri`/`control-room` (lead-glass observation window), `chemo-bay` (side table beside every recliner), `nicu-station` (4 distinct workstations), and dirty-utility `sluice-sink`, with every new item clickable in `equipment.json`.
 - Skipped optional "plan vs 3D" compare slider to keep scope crisp and avoid overlap.
 
+## Step 9: Pharmacy Upgrades
+- Added `src/data/pharmacyScenarios.json` with 5 educational dispensing-verification scenarios (LASA traps, dosage-form verification, and expired-batch quarantine; patient is always `Sample Patient` with no dosing instructions).
+- Added deterministic simulated stock/batch/expiry metadata (`getSimulatedStock`), Low Stock / Near Expiry badges, `scheduleByCountry` display, fridge out-of-range alert toggle (`4.2 °C` / `11.4 °C ALERT`), Controlled-Drug access log, side-by-side Compare modal, and filter pills (`All`, `Refrigerated`, `Controlled`, `Antibiotics`).
+- Upgraded `PharmacyDrugMesh.ts` with distinct shared-geometry procedural shapes per form (blister carton, bottle with neck/cap, metallic crimp-cap vial, L-shaped MDI inhaler with canister, IV pouch with port, injector pen, ointment tube).
+
+
 
 
 

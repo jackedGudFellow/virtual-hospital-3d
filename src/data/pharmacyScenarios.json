@@ -1,0 +1,47 @@
+[
+  {
+    "id": "scn-lasa-metformin",
+    "patient": "Sample Patient",
+    "prescribedDrugId": "metformin-500-tab",
+    "prescribedText": "Metformin Hydrochloride 500 mg — Tablet (As prescribed by physician)",
+    "candidateDrugIds": ["metformin-500-tab", "metronidazole-500-tab", "meloxicam-15-tab"],
+    "trapNote": "Look-Alike / Sound-Alike (LASA) check: Metformin (antidiabetic) vs Metronidazole (antimicrobial).",
+    "batchStatus": "valid"
+  },
+  {
+    "id": "scn-form-ondansetron",
+    "patient": "Sample Patient",
+    "prescribedDrugId": "ondansetron-4-tab",
+    "prescribedText": "Ondansetron 4 mg — Oral Tablet (As prescribed by physician)",
+    "candidateDrugIds": ["ondansetron-4-tab", "ondansetron-8-vial", "omeprazole-20-cap"],
+    "trapNote": "Dosage form check: ensure oral Tablet is selected rather than IV Vial.",
+    "batchStatus": "valid"
+  },
+  {
+    "id": "scn-cold-insulin",
+    "patient": "Sample Patient",
+    "prescribedDrugId": "insulin-glargine-pen",
+    "prescribedText": "Insulin Glargine 100 IU/mL — Pre-filled Pen (As prescribed by physician)",
+    "candidateDrugIds": ["insulin-glargine-pen", "insulin-aspart-pen", "insulin-regular-vial"],
+    "trapNote": "High-Alert LASA check: Basal Insulin Glargine vs Rapid-Acting Insulin Aspart (both stored at 2–8 °C).",
+    "batchStatus": "valid"
+  },
+  {
+    "id": "scn-expired-amox",
+    "patient": "Sample Patient",
+    "prescribedDrugId": "amoxicillin-500-cap",
+    "prescribedText": "Amoxicillin 500 mg — Capsule (As prescribed by physician)",
+    "candidateDrugIds": ["amoxicillin-500-cap", "amoxclav-625-tab", "azithromycin-500-tab"],
+    "trapNote": "Stock safety check: the shelf batch pulled for this order is EXPIRED (2025-04) and must be quarantined instead of dispensed.",
+    "batchStatus": "expired"
+  },
+  {
+    "id": "scn-inhaler-salbutamol",
+    "patient": "Sample Patient",
+    "prescribedDrugId": "salbutamol-100-inh",
+    "prescribedText": "Salbutamol 100 mcg/actuation — Inhaler (As prescribed by physician)",
+    "candidateDrugIds": ["salbutamol-100-inh", "budesonide-200-inh", "ipratropium-20-inh"],
+    "trapNote": "Rescue vs Maintenance inhaler check: Salbutamol (SABA rescue) vs Budesonide (ICS maintenance).",
+    "batchStatus": "valid"
+  }
+]

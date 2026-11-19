@@ -12,6 +12,7 @@ interface HospitalTestHook {
 }
 
 test('loads without console errors, exercises core flows, pharmacy, i18n, quality & screenshots', async ({ page }) => {
+  test.setTimeout(120000);
   const consoleErrors: string[] = [];
   page.on('console', (msg) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text());
@@ -95,6 +96,19 @@ test('loads without console errors, exercises core flows, pharmacy, i18n, qualit
   await page.click('#dispense-go-btn');
   await expect(page.locator('#dispense-rx-label')).toContainText('Sample Patient');
   await page.click('#modal-cancel-btn');
+
+  // Step 9: Rx Check (LASA/Expiry quiz) + Compare modal + Fridge alert
+  await page.click('#pharmacy-rxcheck-open');
+  await page.click('.rx-check-opt >> nth=0');
+  await expect(page.locator('#rx-check-feedback')).toContainText('LASA');
+  await page.click('#modal-cancel-btn');
+
+  await page.click('#pharmacy-compare-open');
+  await expect(page.locator('#cmp-table')).toContainText('Class');
+  await page.click('#modal-cancel-btn');
+
+  await page.click('#pharmacy-fridge-btn');
+  await expect(page.locator('#pharmacy-fridge-btn')).toContainText('ALERT');
 
   // Settings: Quality toggle & EN/AR RTL toggle
   await page.click('#btn-settings');
