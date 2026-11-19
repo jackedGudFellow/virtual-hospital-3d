@@ -55,6 +55,12 @@
 - Hooked `BuildingBuilder`'s distance-based CSS2D label culling via `root.userData.updateLabels(camPos)` invoked by `Engine` so `src/main.ts` remains untouched.
 - Pauses `requestAnimationFrame` on `document.visibilitychange` when hidden and caps touch DPR at `1.5`.
 
+## Step 5: Automated Tests & CI
+- Added `vitest` for pure-logic unit tests (`tests/unit/hospital.test.ts`, superseding `tests/walk-collision.test.ts`) and `@playwright/test` for headless WebGL E2E tests (`tests/e2e/hospital.spec.ts`) using SwiftShader ANGLE flags.
+- Added the read-only/navigation `window.__hospitalTest` hook gated strictly behind `?test=1` in `src/main.ts` as specified in Step 5 Task 2.
+- Added `.github/workflows/ci.yml` and updated `.github/workflows/deploy.yml` so GitHub Pages deploys only after `typecheck`, `build`, `qa`, `test:unit`, and `test:e2e` all pass.
+
+
 
 
 

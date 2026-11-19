@@ -366,6 +366,26 @@ async function bootstrap(): Promise<void> {
 
   engine.start();
 
+  if (new URLSearchParams(window.location.search).get('test') === '1') {
+    (window as unknown as Record<string, unknown>).__hospitalTest = {
+      getRoomIds: () => Array.from(index.rooms.keys()),
+      getDrugIds: () => drugs.map((d) => d.id),
+      getState: () => ({ ...store.getState() }),
+      getCameraPos: () => ({
+        x: engine.camera.position.x,
+        y: engine.camera.position.y,
+        z: engine.camera.position.z,
+      }),
+      getRenderStats: () => ({
+        drawCalls: engine.renderer.info.render.calls,
+        triangles: engine.renderer.info.render.triangles,
+      }),
+      enterRoom: (roomId: string) => bus.emit('room:enter', { roomId }),
+      openCabinet: (cabinetId: string) => bus.emit('pharmacy:cabinet', { cabinetId }),
+      inspectDrug: (drugId: string) => bus.emit('pharmacy:drug', { drugId }),
+    };
+  }
+
   finished = true;
   window.clearTimeout(watchdog);
   setLoadingProgress(100, 'Ready!');
