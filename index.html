@@ -2,16 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Explore an interactive 3D virtual hospital across 5 floors, including ICU, NICU, surgery, chemotherapy, and a 120-medication educational pharmacy."
+    />
+    <meta name="theme-color" content="#0f768a" />
+    <meta property="og:title" content="Interactive 3D Virtual Hospital" />
+    <meta
+      property="og:description"
+      content="Educational 3D hospital explorer with multi-floor navigation, interactive rooms, medical equipment, and a 120-drug pharmacy."
+    />
+    <meta property="og:type" content="website" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f768a'/%3E%3Cpath d='M26 14h12v12h12v12H38v12H26V38H14V26h12z' fill='%23ffffff'/%3E%3C/svg%3E"
+    />
     <title>Interactive 3D Virtual Hospital</title>
   </head>
   <body>
+    <noscript>
+      <div class="noscript-banner">
+        <strong>JavaScript is required</strong> to run the Interactive 3D Virtual Hospital. Please enable JavaScript
+        and reload this page.
+      </div>
+    </noscript>
     <div id="loading-screen" role="status" aria-live="polite">
-      <div class="loading-card">
+      <div class="loading-card" id="loading-card">
         <div class="loading-title">Virtual Hospital 3D</div>
-        <div class="loading-status" id="loading-status">Initializing 3D engine...</div>
+        <div class="loading-status" id="loading-status">Starting application...</div>
         <div class="loading-bar-track"><div class="loading-bar-fill" id="loading-bar"></div></div>
       </div>
+    </div>
+    <div id="context-lost-banner" class="context-lost-banner hidden" role="alert">
+      <strong>3D graphics context was lost.</strong> Attempting to restore WebGL automatically…
     </div>
     <div id="app">
       <div id="canvas-container" aria-label="3D Virtual Hospital Viewport"></div>

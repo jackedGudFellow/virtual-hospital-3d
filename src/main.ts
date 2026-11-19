@@ -20,6 +20,8 @@ import { GuidedTour } from './core/GuidedTour';
 import { EquipmentEntry } from './ui/InfoPanel';
 import { Hud } from './ui/Hud';
 
+const README_URL = 'https://github.com/jackedGudFellow/virtual-hospital-3d#readme';
+
 function setLoadingProgress(pct: number, text: string): void {
   const bar = document.getElementById('loading-bar');
   const status = document.getElementById('loading-status');
@@ -27,54 +29,107 @@ function setLoadingProgress(pct: number, text: string): void {
   if (status) status.textContent = text;
 }
 
-function bootstrap(): void {
-  const container = document.getElementById('canvas-container');
-  const hudRoot = document.getElementById('hud-root');
-  if (!container || !hudRoot) {
-    throw new Error('Required DOM containers (#canvas-container, #hud-root) are missing.');
-  }
-
-  setLoadingProgress(25, 'Loading hospital floor plans & 120 medications...');
-  const hospitalData = hospitalJson as HospitalData;
-  const roomTypes = roomTypesJson as RoomTypesMap;
-  const equipmentMap = equipmentJson as Record<string, EquipmentEntry>;
-  const drugs = drugsJson as DrugSpec[];
-  const index = new HospitalIndex(hospitalData);
-
-  const bus = new EventBus();
-  const store = new StateStore(bus, {
-    activeFloor: null,
-    ceilingsVisible: true,
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => setTimeout(resolve, 0));
   });
+}
 
-  const engine = new Engine(container, bus);
-  const lighting = new Lighting(engine.scene);
+function showStartupError(title: string, detail: string): void {
+  const screen = document.getElementById('loading-screen');
+  if (!screen) return;
+  screen.classList.remove('fade-out');
+  screen.setAttribute('role', 'alert');
+  screen.innerHTML = `
+    <div class="error-card">
+      <div class="error-title">${title}</div>
+      <p class="error-detail">${detail}</p>
+      <p class="error-hint">Try reloading the page, enabling WebGL/hardware acceleration, or opening this site in another browser or device.</p>
+      <div class="error-actions">
+        <button type="button" class="hud-btn active" id="btn-retry-boot">Reload Page</button>
+        <a class="error-link" href="${README_URL}" target="_blank" rel="noopener noreferrer">View README &amp; Troubleshooting →</a>
+      </div>
+    </div>
+  `;
+  screen.querySelector('#btn-retry-boot')?.addEventListener('click', () => window.location.reload());
+}
 
-  const cameraRig = new CameraRig(engine.camera, engine.renderer.domElement);
-  cameraRig.setOrbitPreset();
+async function bootstrap(): Promise<void> {
+  let finished = false;
+  const watchdog = window.setTimeout(() => {
+    if (!finished) {
+      showStartupError(
+        'Startup timed out',
+        'The 3D hospital took longer than 20 seconds to initialize and did not finish loading.',
+      );
+    }
+  }, 20000);
 
-  setLoadingProgress(65, 'Building 3D floors, interiors & pharmacy...');
-  const buildingBuilder = new BuildingBuilder();
-  buildingBuilder.build(hospitalData, drugs);
-  buildingBuilder.setCeilingsVisible(store.getState().ceilingsVisible);
-  engine.scene.add(buildingBuilder.root);
+  try {
+    const container = document.getElementById('canvas-container');
+    const hudRoot = document.getElementById('hud-root');
+    if (!container || !hudRoot) {
+      throw new Error('Required DOM containers (#canvas-container, #hud-root) are missing.');
+    }
 
-  const atmosphere = new Atmosphere(hospitalData);
-  engine.scene.add(atmosphere.group);
-  const ambientAudio = new AmbientAudio();
-  const guidedTour = new GuidedTour(bus);
+    setLoadingProgress(15, 'Loading hospital floor plans & 120 medications...');
+    await nextFrame();
+    const hospitalData = hospitalJson as HospitalData;
+    const roomTypes = roomTypesJson as RoomTypesMap;
+    const equipmentMap = equipmentJson as Record<string, EquipmentEntry>;
+    const drugs = drugsJson as DrugSpec[];
+    const index = new HospitalIndex(hospitalData);
 
-  const picker = new Picker(
-    engine.renderer.domElement,
-    engine.camera,
-    bus,
-    () => buildingBuilder.getRaycastTargets(),
-    (id) => buildingBuilder.getRoomGroup(id),
-  );
+    const bus = new EventBus();
+    const store = new StateStore(bus, {
+      activeFloor: null,
+      ceilingsVisible: true,
+    });
 
-  const hud = new Hud(hudRoot, store, bus, index, roomTypes, equipmentMap, drugs, (jx, jy) => {
-    cameraRig.setWalkInput(jx, jy);
-  });
+    setLoadingProgress(40, 'Initializing 3D WebGL engine...');
+    await nextFrame();
+    const engine = new Engine(container, bus);
+    const lighting = new Lighting(engine.scene);
+
+    const ctxBanner = document.getElementById('context-lost-banner');
+    engine.renderer.domElement.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      engine.stop();
+      ctxBanner?.classList.remove('hidden');
+    });
+    engine.renderer.domElement.addEventListener('webglcontextrestored', () => {
+      ctxBanner?.classList.add('hidden');
+      engine.start();
+    });
+
+    const cameraRig = new CameraRig(engine.camera, engine.renderer.domElement);
+    cameraRig.setOrbitPreset();
+
+    setLoadingProgress(70, 'Building 5 floors, rooms & 120-drug pharmacy...');
+    await nextFrame();
+    const buildingBuilder = new BuildingBuilder();
+    buildingBuilder.build(hospitalData, drugs);
+    buildingBuilder.setCeilingsVisible(store.getState().ceilingsVisible);
+    engine.scene.add(buildingBuilder.root);
+
+    setLoadingProgress(90, 'Starting living atmosphere & UI...');
+    await nextFrame();
+    const atmosphere = new Atmosphere(hospitalData);
+    engine.scene.add(atmosphere.group);
+    const ambientAudio = new AmbientAudio();
+    const guidedTour = new GuidedTour(bus);
+
+    const picker = new Picker(
+      engine.renderer.domElement,
+      engine.camera,
+      bus,
+      () => buildingBuilder.getRaycastTargets(),
+      (id) => buildingBuilder.getRoomGroup(id),
+    );
+
+    const hud = new Hud(hudRoot, store, bus, index, roomTypes, equipmentMap, drugs, (jx, jy) => {
+      cameraRig.setWalkInput(jx, jy);
+    });
 
   bus.on('state:changed', ({ key, value }) => {
     if (key === 'ceilingsVisible') {
@@ -311,11 +366,19 @@ function bootstrap(): void {
 
   engine.start();
 
+  finished = true;
+  window.clearTimeout(watchdog);
   setLoadingProgress(100, 'Ready!');
   const loadingScreen = document.getElementById('loading-screen');
   if (loadingScreen) {
     setTimeout(() => loadingScreen.classList.add('fade-out'), 180);
   }
+  } catch (err) {
+    finished = true;
+    window.clearTimeout(watchdog);
+    const detail = err instanceof Error ? err.message : String(err);
+    showStartupError('Could not start Virtual Hospital 3D', detail);
+  }
 }
 
-bootstrap();
+void bootstrap();
