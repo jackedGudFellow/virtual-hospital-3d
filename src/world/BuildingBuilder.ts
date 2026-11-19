@@ -7,6 +7,9 @@ import { ExteriorBuilder } from './ExteriorBuilder';
 import { InteriorBuilder } from './InteriorBuilder';
 import { collectRoomOpenings, RoomBuilder, WorldOpening } from './RoomBuilder';
 
+const DRAWING_A_URL = new URL('../../reference/drawing-a-nicu.jpg', import.meta.url).href;
+const DRAWING_B_URL = new URL('../../reference/drawing-b-oncology-bmt.jpg', import.meta.url).href;
+
 export type FloorViewMode = 'whole' | 'exploded' | 'isolate';
 
 interface FloorRuntime {
@@ -48,11 +51,61 @@ export class BuildingBuilder {
   private viewMode: FloorViewMode = 'whole';
   private isolatedFloorId: string | null = null;
   private hiddenCeilingRoomId: string | null = null;
+  private overlayPlane: THREE.Mesh | null = null;
+  private overlayMat: THREE.MeshBasicMaterial | null = null;
+  private texLoader = new THREE.TextureLoader();
 
   constructor() {
     this.root.name = 'hospital-building';
     this.root.userData.updateLabels = (camPos: THREE.Vector3) => this.updateLabelCulling(camPos);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('vh3d:plan-overlay', this.onOverlayEvent as EventListener);
+    }
   }
+
+  private onOverlayEvent = (e: CustomEvent<{
+    visible: boolean;
+    opacity: number;
+    scale: number;
+    offsetX: number;
+    offsetZ: number;
+    drawing: 'A' | 'B';
+  }>): void => {
+    const d = e.detail;
+    if (!this.overlayPlane || !this.overlayMat) {
+      this.overlayMat = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: d.opacity,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      this.overlayPlane = new THREE.Mesh(new THREE.PlaneGeometry(60, 64), this.overlayMat);
+      this.overlayPlane.rotation.x = -Math.PI / 2;
+      this.overlayPlane.position.set(28, 0.25, 30);
+      this.root.add(this.overlayPlane);
+    }
+    this.overlayPlane.visible = d.visible;
+    if (d.visible) {
+      const targetUrl = d.drawing === 'A' ? DRAWING_A_URL : DRAWING_B_URL;
+      if (this.overlayPlane.userData.currentUrl !== targetUrl) {
+        this.overlayPlane.userData.currentUrl = targetUrl;
+        this.texLoader.load(targetUrl, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          if (this.overlayMat) {
+            this.overlayMat.map = tex;
+            this.overlayMat.needsUpdate = true;
+          }
+        });
+      }
+      this.overlayMat.opacity = d.opacity;
+      this.overlayPlane.scale.setScalar(d.scale);
+      const activeFloor = this.isolatedFloorId ? this.floors.get(this.isolatedFloorId) : null;
+      const yBase = activeFloor ? activeFloor.group.position.y + 0.15 : 0.25;
+      const baseX = d.drawing === 'A' ? 70 : 28;
+      const baseZ = d.drawing === 'A' ? 8 : 30;
+      this.overlayPlane.position.set(baseX + d.offsetX, yBase, baseZ + d.offsetZ);
+    }
+  };
 
   build(data: HospitalData, drugs: DrugSpec[] = []): void {
     this.clear();

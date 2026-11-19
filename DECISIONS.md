@@ -71,6 +71,12 @@
 - **Minimap Floor Tabs:** Added `L1`–`L5` tabs inside `Minimap` alongside clickable room footprints.
 - **Onboarding & Touch:** Added 3-step dismissible coach marks in `Onboarding.ts` (persisted via `vh3d.onboardingDone`, skipped under `?test=1`) plus 550ms touch long-press on the canvas to enter a selected room.
 
+## Step 8: Fidelity to the Drawings
+- **Reference Drawing Overlay:** Added a semi-transparent textured plane in `BuildingBuilder.ts` loading `reference/drawing-b-oncology-bmt.jpg` and `reference/drawing-a-nicu.jpg` via Vite URL imports, controlled by a Settings toggle (`Plan Overlay`) and opacity/scale/X/Z sliders via `vh3d:plan-overlay` CustomEvent (keeping `main.ts` and `Events.ts` untouched).
+- **Isometric & NICU Interiors:** Rebuilt `bmt-isolation` (anteroom glass partition + private balcony rail + HEPA + sink), `ward-single`/`ward-double` (en-suite toilet + sink + privacy curtain), `ophthalmic` clinic (exam bed + privacy curtain + desk + sink), `mri`/`control-room` (lead-glass observation window), `chemo-bay` (side table beside every recliner), `nicu-station` (4 distinct workstations), and dirty-utility `sluice-sink`, with every new item clickable in `equipment.json`.
+- Skipped optional "plan vs 3D" compare slider to keep scope crisp and avoid overlap.
+
+
 
 
 

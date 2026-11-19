@@ -138,6 +138,7 @@ export class Hud {
               <button type="button" class="hud-btn" id="btn-sound">${t('soundOff')}</button>
               <button type="button" class="hud-btn" id="btn-quality">${t('qualityHigh')}</button>
               <button type="button" class="hud-btn" id="btn-contrast">${t('contrast')}</button>
+              <button type="button" class="hud-btn" id="btn-plan-overlay">Plan Overlay: Off</button>
               <button type="button" class="hud-btn" id="btn-lang">${t('langBtn')}</button>
             </div>
           </div>
@@ -157,6 +158,14 @@ export class Hud {
       <div class="info-panel hud-interactive hidden" id="hud-info-panel"></div>
       <div class="hud-interactive" id="hud-pharmacy-root"></div>
       <div class="onboarding-host hud-interactive hidden" id="hud-onboarding"></div>
+      <div class="tour-banner hud-interactive hidden" id="plan-overlay-bar" style="bottom: 122px; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="hud-btn active" id="ov-draw-b">Drawing B</button>
+        <button type="button" class="hud-btn" id="ov-draw-a">Drawing A (NICU)</button>
+        <label style="font-size:11px">Opacity <input type="range" id="ov-opacity" min="0.1" max="0.95" step="0.05" value="0.55" style="width:70px"/></label>
+        <label style="font-size:11px">Scale <input type="range" id="ov-scale" min="0.3" max="1.8" step="0.05" value="1" style="width:70px"/></label>
+        <label style="font-size:11px">X <input type="range" id="ov-ox" min="-25" max="25" step="1" value="0" style="width:60px"/></label>
+        <label style="font-size:11px">Z <input type="range" id="ov-oz" min="-25" max="25" step="1" value="0" style="width:60px"/></label>
+      </div>
 
       <div class="pharmacy-modal hud-interactive hidden" id="hud-help-modal" role="dialog" aria-modal="true" aria-label="How to Explore">
         <div class="pharmacy-modal-card">
@@ -382,6 +391,53 @@ export class Hud {
       this.highContrast = !this.highContrast;
       hcBtn.classList.toggle('active', this.highContrast);
       document.getElementById('app')?.classList.toggle('high-contrast', this.highContrast);
+    });
+
+    const ovBtn = this.root.querySelector('#btn-plan-overlay') as HTMLButtonElement | null;
+    const ovBar = this.root.querySelector('#plan-overlay-bar') as HTMLElement | null;
+    let ovState: { visible: boolean; opacity: number; scale: number; offsetX: number; offsetZ: number; drawing: 'A' | 'B' } = {
+      visible: false,
+      opacity: 0.55,
+      scale: 1,
+      offsetX: 0,
+      offsetZ: 0,
+      drawing: 'B',
+    };
+    const emitOverlay = (): void => {
+      window.dispatchEvent(new CustomEvent('vh3d:plan-overlay', { detail: { ...ovState } }));
+    };
+    ovBtn?.addEventListener('click', () => {
+      ovState.visible = !ovState.visible;
+      ovBtn.textContent = `Plan Overlay: ${ovState.visible ? 'On' : 'Off'}`;
+      ovBtn.classList.toggle('active', ovState.visible);
+      ovBar?.classList.toggle('hidden', !ovState.visible);
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-draw-b')?.addEventListener('click', () => {
+      ovState.drawing = 'B';
+      ovState.scale = 1;
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-draw-a')?.addEventListener('click', () => {
+      ovState.drawing = 'A';
+      ovState.scale = 0.45;
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-opacity')?.addEventListener('input', (e) => {
+      ovState.opacity = Number((e.target as HTMLInputElement).value);
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-scale')?.addEventListener('input', (e) => {
+      ovState.scale = Number((e.target as HTMLInputElement).value);
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-ox')?.addEventListener('input', (e) => {
+      ovState.offsetX = Number((e.target as HTMLInputElement).value);
+      emitOverlay();
+    });
+    this.root.querySelector('#ov-oz')?.addEventListener('input', (e) => {
+      ovState.offsetZ = Number((e.target as HTMLInputElement).value);
+      emitOverlay();
     });
 
     const langBtn = this.root.querySelector('#btn-lang') as HTMLButtonElement;

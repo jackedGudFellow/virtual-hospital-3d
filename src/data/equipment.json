@@ -153,5 +153,40 @@
     "name": "Stainless Utility & Supply Rack",
     "category": "Services",
     "description": "Modular wire shelving for organizing clean linen, sterile supplies, or mechanical equipment."
+  },
+  "privacy-curtain": {
+    "name": "Antimicrobial Privacy Curtain",
+    "category": "Patient Privacy",
+    "description": "Ceiling-hung disposable antimicrobial cubicle curtain separating patient bays and exam areas."
+  },
+  "toilet-fixture": {
+    "name": "Accessible En-Suite Restroom",
+    "category": "Patient Care",
+    "description": "ADA-accessible patient toilet with safety grab bars and emergency pull-cord inside inpatient wards."
+  },
+  "side-table": {
+    "name": "Infusion Side Table",
+    "category": "Oncology",
+    "description": "Compact cleanable side table beside each chemotherapy recliner for personal items and refreshments."
+  },
+  "balcony-rail": {
+    "name": "BMT Isolation Private Balcony",
+    "category": "BMT Isolation",
+    "description": "Glazed private balcony rail providing natural daylight and outdoor visual relief during extended BMT isolation."
+  },
+  "glass-partition": {
+    "name": "Anteroom Glazed Partition",
+    "category": "Infection Control",
+    "description": "Sealed glass barrier separating the positive-pressure isolation suite from its gowning anteroom."
+  },
+  "lead-glass-window": {
+    "name": "Lead-Glass Observation Window",
+    "category": "Diagnostic Imaging",
+    "description": "Radiation- and RF-shielded observation window allowing technologists to monitor patients during scans."
+  },
+  "sluice-sink": {
+    "name": "Flush / Sluicing Hopper Sink",
+    "category": "Infection Control",
+    "description": "Clinical dirty-utility sluicing sink and bedpan washer for safe disposal of clinical waste."
   }
 }
