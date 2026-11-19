@@ -37,6 +37,13 @@
 - Guarded `THREE.WebGLRenderer` creation in `Engine.ts` with a preflight `webgl2`/`webgl` context check and `try/catch`, plus `webglcontextlost`/`webglcontextrestored` handlers in `main.ts`.
 - Split `bootstrap()` into 5 async stages separated by `requestAnimationFrame` + `setTimeout(0)` (`nextFrame()`) with a 20-second startup watchdog so the progress bar visibly paints and never hangs silently.
 
+## Step 2: Layout & Data Corrections
+- **Surgery overlap fix:** Adjusted `L1.surgery.mri` from `d: 9` to `d: 8` (`z: 26..34`) and `L1.surgery.control` from `z: 35, d: 7` to `z: 34, d: 8` (`z: 34..42`), eliminating the `x: 20..21, z: 34..35` overlap with `L1.surgery.post-op`.
+- **Pharmacy connectivity:** Swapped `L1.pharmacy.storage` (`x: 42..56, z: 34..42`) and `L1.chemo.cytotoxic-prep` (`x: 42..56, z: 26..34`) so `Pharmacy — Storage` sits directly across the 4 m south corridor from `Pharmacy — Dispensing` (`x: 38..47, z: 46..60`) with aligned staff-only doors (`x: 43.5..44.9`), while keeping the direct pass-through door (`z = 34`) between Storage and Cytotoxic Prep and keeping the public dispensing window facing the Main Lobby.
+- **L3 reachability fix:** Added a south door on `L3.psychology.eating-body` linking `L3.circulation.spine-main` to `L3.circulation.spine-south` so all 5 South L3 rooms (`one-to-one`, `spine-south`, `hydrotherapy`, `massage`, `consultant`) are reachable from `L1.main.lobby`.
+- **Drugs & Sources:** Fixed `aprepitant-125-cap` (`form: "Capsule"`, `strength: "125 mg / 80 mg (3-day pack)"`), added verified `scheduleByCountry.US` (DEA Schedules II/III/IV) to Cabinet K controlled drugs, and updated `docs/SOURCES.md` to WHO EML 24th Edition (Sept 2025) + 10th EMLc + DEA CSA.
+
+
 
 
 
