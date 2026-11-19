@@ -43,6 +43,13 @@
 - **L3 reachability fix:** Added a south door on `L3.psychology.eating-body` linking `L3.circulation.spine-main` to `L3.circulation.spine-south` so all 5 South L3 rooms (`one-to-one`, `spine-south`, `hydrotherapy`, `massage`, `consultant`) are reachable from `L1.main.lobby`.
 - **Drugs & Sources:** Fixed `aprepitant-125-cap` (`form: "Capsule"`, `strength: "125 mg / 80 mg (3-day pack)"`), added verified `scheduleByCountry.US` (DEA Schedules II/III/IV) to Cabinet K controlled drugs, and updated `docs/SOURCES.md` to WHO EML 24th Edition (Sept 2025) + 10th EMLc + DEA CSA.
 
+## Step 3: Walk Collision
+- Replaced the door-radius proximity shortcut in `CameraRig.ts` with pure circle-vs-wall-segment and circle-vs-AABB furniture collision (`resolveCircleMovement` in `HospitalIndex.ts`) using deduplicated floor wall segments with real door gaps.
+- Derived furniture collision AABBs for large fixtures (beds, OR tables, MRI gantry, reception desks, conference tables, hydrotherapy pool, pharmacy counter/cabinets/racks) from `room.type` & `room.bounds` without modifying visual builders owned by later steps.
+- Click-to-walk now routes between rooms via BFS door waypoints (`computeDoorPath`) instead of walking straight into walls.
+- Added pure-logic unit tests in `tests/walk-collision.test.ts` runnable directly with Node v26 `node --test` (keeping `package.json` untouched until Step 5).
+
+
 
 
 
