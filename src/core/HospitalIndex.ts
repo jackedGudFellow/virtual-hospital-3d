@@ -1,6 +1,19 @@
 import * as THREE from 'three';
 import { FloorSpec, HospitalData, RoomSpec } from './HospitalTypes';
 
+export interface FloorWalkData {
+  floorY: number;
+  rooms: Array<{
+    id: string;
+    isCorridor: boolean;
+    minX: number;
+    maxX: number;
+    minZ: number;
+    maxZ: number;
+  }>;
+  doors: Array<{ x: number; z: number; radius: number }>;
+}
+
 export interface IndexedRoom {
   floor: FloorSpec;
   room: RoomSpec;
@@ -147,5 +160,52 @@ export class HospitalIndex {
       }
     }
     return results;
+  }
+
+  getFloorWalkData(floorId: string): FloorWalkData | null {
+    const floor = this.floors.find((f) => f.id === floorId);
+    if (!floor) return null;
+    const [ox, oz] = this.data.building.originOffset;
+    const floorY = (floor.level - 1) * this.data.building.floorHeight;
+
+    const rooms: FloorWalkData['rooms'] = [];
+    const doors: FloorWalkData['doors'] = [];
+
+    for (const room of floor.rooms) {
+      const { x, z, w, d } = room.bounds;
+      const minX = ox + x;
+      const maxX = ox + x + w;
+      const minZ = oz + z;
+      const maxZ = oz + z + d;
+      rooms.push({
+        id: room.id,
+        isCorridor: room.type === 'corridor' || room.type === 'lift-stair',
+        minX,
+        maxX,
+        minZ,
+        maxZ,
+      });
+
+      for (const door of room.doors ?? []) {
+        let dx = minX;
+        let dz = minZ;
+        if (door.wall === 'N') {
+          dx = minX + door.offset + door.width / 2;
+          dz = minZ;
+        } else if (door.wall === 'S') {
+          dx = minX + door.offset + door.width / 2;
+          dz = maxZ;
+        } else if (door.wall === 'W') {
+          dx = minX;
+          dz = minZ + door.offset + door.width / 2;
+        } else {
+          dx = maxX;
+          dz = minZ + door.offset + door.width / 2;
+        }
+        doors.push({ x: dx, z: dz, radius: Math.max(1.2, door.width * 0.75) });
+      }
+    }
+
+    return { floorY, rooms, doors };
   }
 }

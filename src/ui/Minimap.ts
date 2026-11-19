@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import { EventBus } from '../core/Events';
 import { HospitalIndex } from '../core/HospitalIndex';
 
 /**
- * 2D canvas minimap showing the active floor plan and a live "you are here" indicator.
+ * Interactive 2D canvas minimap: click any room to fly straight to it,
+ * with a live "you are here" indicator.
  */
 export class Minimap {
   private el: HTMLElement;
@@ -10,22 +12,52 @@ export class Minimap {
   private ctx: CanvasRenderingContext2D;
   private titleEl: HTMLElement;
   private index: HospitalIndex;
+  private bus: EventBus;
   private activeFloorId = 'L1';
   private activeRoomId: string | null = null;
 
-  constructor(container: HTMLElement, index: HospitalIndex) {
+  constructor(container: HTMLElement, index: HospitalIndex, bus: EventBus) {
     this.el = container;
     this.index = index;
+    this.bus = bus;
     this.el.innerHTML = `
       <div class="minimap-header">
         <span class="minimap-title" id="minimap-title">Floor L1</span>
-        <span class="minimap-sub">You are here ●</span>
+        <span class="minimap-sub">Click room to jump ●</span>
       </div>
-      <canvas width="180" height="150" class="minimap-canvas" id="minimap-canvas"></canvas>
+      <canvas width="180" height="150" class="minimap-canvas" id="minimap-canvas" title="Click any room to fly there"></canvas>
     `;
     this.canvas = this.el.querySelector('#minimap-canvas') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d')!;
     this.titleEl = this.el.querySelector('#minimap-title') as HTMLElement;
+
+    this.canvas.addEventListener('click', (e) => this.handleClick(e));
+  }
+
+  private getTransform(): { pad: number; scale: number } {
+    const maxW = this.activeFloorId === 'L2' ? 84 : 58;
+    const maxD = 62;
+    const pad = 8;
+    const scale = Math.min((this.canvas.width - pad * 2) / maxW, (this.canvas.height - pad * 2) / maxD);
+    return { pad, scale };
+  }
+
+  private handleClick(e: MouseEvent): void {
+    const floor = this.index.floors.find((f) => f.id === this.activeFloorId) ?? this.index.floors[0];
+    if (!floor) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const cx = ((e.clientX - rect.left) / rect.width) * this.canvas.width;
+    const cy = ((e.clientY - rect.top) / rect.height) * this.canvas.height;
+    const { pad, scale } = this.getTransform();
+    const wx = (cx - pad) / scale;
+    const wz = (cy - pad) / scale;
+
+    const hit = floor.rooms.find(
+      (r) => wx >= r.bounds.x && wx <= r.bounds.x + r.bounds.w && wz >= r.bounds.z && wz <= r.bounds.z + r.bounds.d,
+    );
+    if (hit) {
+      this.bus.emit('search:flyto', { roomId: hit.id });
+    }
   }
 
   setContext(floorId: string | null, roomId: string | null): void {

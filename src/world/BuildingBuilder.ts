@@ -174,10 +174,12 @@ export class BuildingBuilder {
         mat.depthWrite = !isGhost;
       }
 
-      const showLabels = this.labelsVisible && (!isGhost || this.viewMode === 'whole') &&
-        (this.viewMode !== 'whole' || id === 'L1');
+      const showLabels =
+        this.labelsVisible &&
+        this.viewMode === 'isolate' &&
+        id === this.isolatedFloorId;
       for (const lbl of rt.labels) {
-        lbl.visible = showLabels;
+        lbl.visible = showLabels && !lbl.userData.isMinorLabel;
       }
 
       const showCeilings = this.ceilingsVisible && this.viewMode === 'whole';

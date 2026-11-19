@@ -84,6 +84,7 @@ function bootstrap(): void {
 
   bus.on('floor:view', ({ viewMode, floorId }) => {
     cameraRig.exitWalkMode();
+    hud.setJoystickVisible(false);
     picker.setItemMode(false);
     picker.setEnabled(true);
     buildingBuilder.setHiddenCeilingRoom(null);
@@ -92,11 +93,18 @@ function bootstrap(): void {
     if (viewMode === 'isolate' && floorId) {
       store.set('activeFloor', floorId);
       store.set('mode', 'FLOOR');
+      const floor = index.floors.find((f) => f.id === floorId);
+      if (floor) {
+        cameraRig.flyToFloor((floor.level - 1) * hospitalData.building.floorHeight);
+      }
     } else {
       store.set('activeFloor', null);
       store.set('activeRoom', null);
       store.set('mode', 'EXTERIOR');
       picker.setSelectedRoom(null);
+      if (viewMode === 'whole') {
+        cameraRig.setOrbitPreset();
+      }
     }
   });
 
@@ -130,10 +138,30 @@ function bootstrap(): void {
     store.set('activeRoom', roomId);
     store.set('mode', 'ROOM');
 
-    cameraRig.flyThroughDoor(entry.doorEntry.outside, entry.doorEntry.inside, entry.doorEntry.lookAt, {
-      ...entry.worldBounds,
-      floorY: entry.floorY,
-    });
+    hud.setJoystickVisible(false);
+    cameraRig.flyToRoomDollhouse(entry.center, entry.floorY);
+  });
+
+  bus.on('camera:toggleWalk', () => {
+    if (cameraRig.isWalking()) {
+      cameraRig.exitWalkMode();
+      hud.setJoystickVisible(false);
+      const s = store.getState();
+      const entry = s.activeRoom ? index.rooms.get(s.activeRoom) : null;
+      if (entry) cameraRig.flyToRoomDollhouse(entry.center, entry.floorY);
+      return;
+    }
+
+    const s = store.getState();
+    const floorId = s.activeFloor ?? 'L1';
+    const floorWalk = index.getFloorWalkData(floorId);
+    const entry = s.activeRoom ? index.rooms.get(s.activeRoom) : null;
+    if (!floorWalk) return;
+
+    const startPos = entry ? entry.doorEntry.inside : new THREE.Vector3(0, floorWalk.floorY + 1.65, 0);
+    const lookAt = entry ? entry.doorEntry.lookAt : startPos.clone().add(new THREE.Vector3(0, 0, -2));
+    cameraRig.enterWalkMode(floorWalk, startPos, lookAt);
+    hud.setJoystickVisible(true);
   });
 
   bus.on('search:flyto', ({ roomId }) => {
@@ -207,13 +235,13 @@ function bootstrap(): void {
       return;
     }
     buildingBuilder.pharmacyBuilder.toggleCabinet(cabinetId);
-    cameraRig.faceInWalkMode(cab.facePos, cab.lookAt);
+    cameraRig.faceTarget(cab.facePos, cab.lookAt);
   });
 
   bus.on('pharmacy:unlockControlled', () => {
     buildingBuilder.pharmacyBuilder.unlockControlled();
     const cab = buildingBuilder.pharmacyBuilder.cabinets.get('K');
-    if (cab) cameraRig.faceInWalkMode(cab.facePos, cab.lookAt);
+    if (cab) cameraRig.faceTarget(cab.facePos, cab.lookAt);
   });
 
   bus.on('pharmacy:drug', ({ drugId }) => {
@@ -242,7 +270,7 @@ function bootstrap(): void {
         if (!cab.meta.isControlled || buildingBuilder.pharmacyBuilder.controlledUnlocked) {
           if (!cab.isOpen) buildingBuilder.pharmacyBuilder.toggleCabinet(cab.meta.id);
         }
-        cameraRig.faceInWalkMode(cab.facePos, cab.lookAt);
+        cameraRig.faceTarget(cab.facePos, cab.lookAt);
       }
     }
   });

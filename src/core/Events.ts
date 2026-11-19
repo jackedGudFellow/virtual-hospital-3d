@@ -68,6 +68,7 @@ export interface AppEvents {
   'tour:start': Record<string, never>;
   'tour:stop': Record<string, never>;
   'tour:step': { title: string | null; active: boolean };
+  'camera:toggleWalk': Record<string, never>;
 }
 
 /**

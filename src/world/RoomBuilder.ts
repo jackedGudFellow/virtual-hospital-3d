@@ -137,13 +137,18 @@ export class RoomBuilder {
       group.add(ceilingMesh);
     }
 
-    // Room label badge
+    // Room label badge (skip minor circulation/utility rooms to keep view clean)
     const labelDiv = document.createElement('div');
     labelDiv.className = 'room-label';
     labelDiv.textContent = room.name;
     labelDiv.style.borderLeftColor = dept.accentColor;
+    const isMinor = room.type === 'corridor' || room.type === 'air-lock' || room.type === 'courtyard';
+    if (isMinor) {
+      labelDiv.style.display = 'none';
+    }
     const labelObject = new CSS2DObject(labelDiv);
     labelObject.position.set(x + w / 2, 0.5, z + d / 2);
+    labelObject.userData.isMinorLabel = isMinor;
     group.add(labelObject);
 
     return { group, floorMesh, ceilingMesh, labelObject };

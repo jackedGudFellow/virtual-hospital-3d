@@ -1,13 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
-export interface WalkBounds {
-  minX: number;
-  maxX: number;
-  minZ: number;
-  maxZ: number;
-  floorY: number;
-}
+import { FloorWalkData } from './HospitalIndex';
 
 interface TweenWaypoint {
   pos: THREE.Vector3;
@@ -23,13 +16,13 @@ interface ActiveTween {
   onComplete?: () => void;
 }
 
-const PLAYER_RADIUS = 0.45;
+const PLAYER_RADIUS = 0.35;
 const EYE_HEIGHT = 1.65;
-const WALK_SPEED = 4.2;
+const WALK_SPEED = 4.6;
 
 /**
- * Manages OrbitControls, smooth fly-to tweens (including through-door entry),
- * and first-person walk mode with AABB wall collision.
+ * Manages OrbitControls (Dollhouse / Exterior / Floor framing), smooth fly-to tweens,
+ * and toggleable floor-wide first-person Walk Mode with doorway-aware wall collision.
  */
 export class CameraRig {
   public readonly controls: OrbitControls;
@@ -38,7 +31,7 @@ export class CameraRig {
 
   private tween: ActiveTween | null = null;
   private walkMode = false;
-  private walkBounds: WalkBounds | null = null;
+  private floorWalk: FloorWalkData | null = null;
   private yaw = 0;
   private pitch = 0;
   private keys = new Set<string>();
@@ -52,10 +45,10 @@ export class CameraRig {
 
     this.controls = new OrbitControls(camera, domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.07;
+    this.controls.dampingFactor = 0.08;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.03;
-    this.controls.minDistance = 2;
-    this.controls.maxDistance = 160;
+    this.controls.minDistance = 1.4;
+    this.controls.maxDistance = 150;
     this.controls.target.set(6, 7, 0);
     this.controls.update();
 
@@ -93,7 +86,14 @@ export class CameraRig {
 
   setOrbitPreset(): void {
     this.exitWalkMode();
-    this.flyToOrbit(new THREE.Vector3(6, 7, 0), new THREE.Vector3(60, 44, 64), 0.75);
+    this.flyToOrbit(new THREE.Vector3(6, 7, 0), new THREE.Vector3(60, 44, 64), 0.7);
+  }
+
+  flyToFloor(floorY: number): void {
+    this.exitWalkMode();
+    const target = new THREE.Vector3(4, floorY + 1.2, 0);
+    const camPos = new THREE.Vector3(46, floorY + 34, 50);
+    this.flyToOrbit(target, camPos, 0.65);
   }
 
   flyToOrbit(target: THREE.Vector3, camPos: THREE.Vector3, duration = 0.65): void {
@@ -113,46 +113,33 @@ export class CameraRig {
     };
   }
 
-  flyThroughDoor(
-    outside: THREE.Vector3,
-    inside: THREE.Vector3,
-    lookAt: THREE.Vector3,
-    bounds: WalkBounds,
-  ): void {
-    this.walkMode = false;
-    this.controls.enabled = false;
-    this.tween = {
-      waypoints: [
-        { pos: outside.clone(), lookAt: inside.clone() },
-        { pos: inside.clone(), lookAt: lookAt.clone() },
-      ],
-      duration: 1.05,
-      elapsed: 0,
-      startPos: this.camera.position.clone(),
-      startLook: this.controls.target.clone(),
-      onComplete: () => {
-        this.enterWalkMode(bounds, lookAt);
-      },
-    };
+  flyToRoomDollhouse(center: THREE.Vector3, floorY: number): void {
+    this.exitWalkMode();
+    const target = new THREE.Vector3(center.x, floorY + 1.0, center.z);
+    const camPos = new THREE.Vector3(center.x + 5.2, floorY + 5.4, center.z + 6.2);
+    this.flyToOrbit(target, camPos, 0.7);
   }
 
-  private enterWalkMode(bounds: WalkBounds, lookAt: THREE.Vector3): void {
+  faceTarget(pos: THREE.Vector3, lookAt: THREE.Vector3): void {
+    if (this.walkMode) {
+      this.camera.position.set(pos.x, (this.floorWalk?.floorY ?? 0) + EYE_HEIGHT, pos.z);
+      this.camera.lookAt(lookAt);
+      const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+      this.yaw = euler.y;
+      this.pitch = THREE.MathUtils.clamp(euler.x, -1.15, 1.15);
+      return;
+    }
+    this.flyToOrbit(lookAt, pos, 0.55);
+  }
+
+  enterWalkMode(floorWalk: FloorWalkData, startPos: THREE.Vector3, lookAt: THREE.Vector3): void {
+    this.tween = null;
     this.walkMode = true;
-    this.walkBounds = bounds;
+    this.floorWalk = floorWalk;
     this.controls.enabled = false;
+    this.camera.position.set(startPos.x, floorWalk.floorY + EYE_HEIGHT, startPos.z);
     this.camera.lookAt(lookAt);
 
-    const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
-    this.yaw = euler.y;
-    this.pitch = THREE.MathUtils.clamp(euler.x, -1.15, 1.15);
-    this.clampPositionToBounds();
-  }
-
-  faceInWalkMode(pos: THREE.Vector3, lookAt: THREE.Vector3): void {
-    if (!this.walkMode || !this.walkBounds) return;
-    this.camera.position.set(pos.x, this.walkBounds.floorY + EYE_HEIGHT, pos.z);
-    this.clampPositionToBounds();
-    this.camera.lookAt(lookAt);
     const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
     this.yaw = euler.y;
     this.pitch = THREE.MathUtils.clamp(euler.x, -1.15, 1.15);
@@ -161,7 +148,6 @@ export class CameraRig {
   exitWalkMode(): void {
     if (!this.walkMode) return;
     this.walkMode = false;
-    this.walkBounds = null;
     this.isLooking = false;
     this.keys.clear();
     this.joystickInput = { x: 0, y: 0 };
@@ -193,26 +179,11 @@ export class CameraRig {
     const rawT = Math.min(1, tw.elapsed / tw.duration);
     const t = rawT < 0.5 ? 4 * rawT * rawT * rawT : 1 - Math.pow(-2 * rawT + 2, 3) / 2;
 
-    if (tw.waypoints.length === 1) {
-      const wp = tw.waypoints[0];
-      this.camera.position.lerpVectors(tw.startPos, wp.pos, t);
-      const look = new THREE.Vector3().lerpVectors(tw.startLook, wp.lookAt, t);
-      this.camera.lookAt(look);
-      this.controls.target.copy(look);
-    } else {
-      const [wp0, wp1] = tw.waypoints;
-      if (t < 0.55) {
-        const localT = t / 0.55;
-        this.camera.position.lerpVectors(tw.startPos, wp0.pos, localT);
-        const look = new THREE.Vector3().lerpVectors(tw.startLook, wp0.lookAt, localT);
-        this.camera.lookAt(look);
-      } else {
-        const localT = (t - 0.55) / 0.45;
-        this.camera.position.lerpVectors(wp0.pos, wp1.pos, localT);
-        const look = new THREE.Vector3().lerpVectors(wp0.lookAt, wp1.lookAt, localT);
-        this.camera.lookAt(look);
-      }
-    }
+    const wp = tw.waypoints[0];
+    this.camera.position.lerpVectors(tw.startPos, wp.pos, t);
+    const look = new THREE.Vector3().lerpVectors(tw.startLook, wp.lookAt, t);
+    this.camera.lookAt(look);
+    this.controls.target.copy(look);
 
     if (rawT >= 1) {
       const cb = tw.onComplete;
@@ -242,20 +213,46 @@ export class CameraRig {
         .addScaledVector(fwdVec, forward)
         .addScaledVector(rightVec, strafe);
       if (move.lengthSq() > 1) move.normalize();
-      this.camera.position.addScaledVector(move, WALK_SPEED * dt);
+      move.multiplyScalar(WALK_SPEED * dt);
+
+      const curX = this.camera.position.x;
+      const curZ = this.camera.position.z;
+      if (this.canWalkTo(curX, curZ, curX + move.x, curZ)) {
+        this.camera.position.x += move.x;
+      }
+      if (this.canWalkTo(this.camera.position.x, curZ, this.camera.position.x, curZ + move.z)) {
+        this.camera.position.z += move.z;
+      }
     }
 
-    this.clampPositionToBounds();
+    if (this.floorWalk) {
+      this.camera.position.y = this.floorWalk.floorY + EYE_HEIGHT;
+    }
   }
 
-  private clampPositionToBounds(): void {
-    if (!this.walkBounds) return;
-    const { minX, maxX, minZ, maxZ, floorY } = this.walkBounds;
-    const padX = Math.min(PLAYER_RADIUS, (maxX - minX) * 0.3);
-    const padZ = Math.min(PLAYER_RADIUS, (maxZ - minZ) * 0.3);
-    this.camera.position.x = THREE.MathUtils.clamp(this.camera.position.x, minX + padX, maxX - padX);
-    this.camera.position.z = THREE.MathUtils.clamp(this.camera.position.z, minZ + padZ, maxZ - padZ);
-    this.camera.position.y = floorY + EYE_HEIGHT;
+  private canWalkTo(fromX: number, fromZ: number, toX: number, toZ: number): boolean {
+    if (!this.floorWalk) return true;
+    const fromRoom = this.floorWalk.rooms.find(
+      (r) => fromX >= r.minX && fromX <= r.maxX && fromZ >= r.minZ && fromZ <= r.maxZ,
+    );
+    const toRoom = this.floorWalk.rooms.find(
+      (r) =>
+        toX >= r.minX + PLAYER_RADIUS * 0.4 &&
+        toX <= r.maxX - PLAYER_RADIUS * 0.4 &&
+        toZ >= r.minZ + PLAYER_RADIUS * 0.4 &&
+        toZ <= r.maxZ - PLAYER_RADIUS * 0.4,
+    );
+
+    // Allow staying inside the same room, or moving between corridors
+    if (toRoom && fromRoom && (toRoom.id === fromRoom.id || (toRoom.isCorridor && fromRoom.isCorridor))) {
+      return true;
+    }
+
+    // Allow crossing between rooms if near a declared doorway
+    const nearDoor = this.floorWalk.doors.some(
+      (d) => Math.hypot(toX - d.x, toZ - d.z) <= d.radius + 0.55,
+    );
+    return nearDoor;
   }
 
   private onKeyDown = (e: KeyboardEvent): void => {

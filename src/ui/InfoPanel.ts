@@ -110,7 +110,8 @@ export class InfoPanel {
       <div class="info-actions">
         ${
           isInside
-            ? `<div class="info-walk-hint">WASD / Arrows + Drag to look · Esc to exit</div>`
+            ? `<button type="button" class="hud-btn active info-enter-btn" id="info-walk-toggle">Toggle Walk Mode (WASD)</button>
+               <div class="info-walk-hint">Orbit/Zoom freely or toggle Walk Mode to stroll across the floor · Esc to exit</div>`
             : `<button type="button" class="hud-btn active info-enter-btn" id="info-enter-btn">Enter Room</button>`
         }
       </div>
@@ -124,6 +125,10 @@ export class InfoPanel {
       if (this.currentRoom) {
         this.bus.emit('room:enter', { roomId: this.currentRoom.room.id });
       }
+    });
+
+    this.el.querySelector('#info-walk-toggle')?.addEventListener('click', () => {
+      this.bus.emit('camera:toggleWalk', {});
     });
   }
 }

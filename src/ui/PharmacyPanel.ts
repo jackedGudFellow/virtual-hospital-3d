@@ -28,17 +28,25 @@ export class PharmacyPanel {
   }
 
   private renderShell(): void {
+    const cabBtns = PHARMACY_CABINETS.map(
+      (c) =>
+        `<button type="button" class="cab-pill" data-cab="${c.id}" title="${c.title}" style="border-color:${c.color}">${c.id}</button>`,
+    ).join('');
+
     this.root.innerHTML = `
       <div class="pharmacy-toolbar hidden" id="pharmacy-toolbar">
-        <div class="pharmacy-toolbar-title">Pharmacy Inventory (120 Drugs)</div>
-        <input
-          type="search"
-          class="search-input"
-          id="pharmacy-drug-search"
-          placeholder="Search drug (e.g. insulin, morphine)..."
-          autocomplete="off"
-        />
-        <button type="button" class="hud-btn active" id="pharmacy-dispense-open">Dispense Rx</button>
+        <div class="pharmacy-toolbar-row">
+          <div class="pharmacy-toolbar-title">Pharmacy (120 Drugs)</div>
+          <input
+            type="search"
+            class="search-input"
+            id="pharmacy-drug-search"
+            placeholder="Search drug (e.g. insulin, morphine)..."
+            autocomplete="off"
+          />
+          <button type="button" class="hud-btn active" id="pharmacy-dispense-open">Dispense Rx</button>
+        </div>
+        <div class="pharmacy-cab-strip" aria-label="Jump to cabinet">${cabBtns}</div>
       </div>
       <div class="pharmacy-inspect hidden" id="pharmacy-inspect"></div>
       <div class="pharmacy-modal hidden" id="pharmacy-modal"></div>
@@ -56,6 +64,13 @@ export class PharmacyPanel {
     this.root.querySelector('#pharmacy-dispense-open')?.addEventListener('click', () => {
       this.openDispenseModal();
     });
+
+    for (const btn of this.root.querySelectorAll<HTMLButtonElement>('.cab-pill')) {
+      btn.addEventListener('click', () => {
+        const cabId = btn.dataset.cab;
+        if (cabId) this.bus.emit('pharmacy:cabinet', { cabinetId: cabId });
+      });
+    }
   }
 
   setVisible(visible: boolean): void {
