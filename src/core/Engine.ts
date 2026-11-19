@@ -8,8 +8,40 @@ import { EventBus } from './Events';
 
 export type UpdateCallback = (dt: number, elapsed: number) => void;
 
+const QUALITY_STORAGE_KEY = 'vh3d.quality';
+
+function isTouchDevice(): boolean {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
+function readSavedQuality(): 'low' | 'high' | null {
+  try {
+    const val = window.localStorage.getItem(QUALITY_STORAGE_KEY);
+    return val === 'low' || val === 'high' ? val : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSavedQuality(low: boolean): void {
+  try {
+    window.localStorage.setItem(QUALITY_STORAGE_KEY, low ? 'low' : 'high');
+  } catch {
+    // Ignore storage quota or private-mode errors
+  }
+}
+
+function detectLowEndDevice(): boolean {
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const lowMem = typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 4;
+  const lowCores = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4;
+  const smallViewport = window.innerWidth < 768;
+  return isTouchDevice() || lowMem || lowCores || smallViewport;
+}
+
 /**
- * Core Three.js engine managing WebGLRenderer, CSS2DRenderer, Scene, resize, and main loop.
+ * Core Three.js engine managing WebGLRenderer, CSS2DRenderer, post-processing,
+ * auto-quality detection, tab-visibility pausing, resize, and main loop.
  */
 export class Engine {
   public readonly scene: THREE.Scene;
@@ -21,11 +53,17 @@ export class Engine {
   private bus: EventBus;
   private composer: EffectComposer | null = null;
   private lowQuality = false;
+  private manualQualityOverride = false;
   private updateCallbacks = new Set<UpdateCallback>();
   private rafId: number | null = null;
+  private running = false;
   private clock = new THREE.Clock();
   private frameCount = 0;
   private fpsAccumTime = 0;
+
+  private startupTime = 0;
+  private startupFrames = 0;
+  private startupChecked = false;
 
   constructor(container: HTMLElement, bus: EventBus) {
     this.container = container;
@@ -58,7 +96,7 @@ export class Engine {
       const msg = err instanceof Error ? err.message : String(err);
       throw new Error(`Unable to initialize 3D WebGL renderer: ${msg}`);
     }
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
     this.renderer.setSize(width, height);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -76,7 +114,23 @@ export class Engine {
 
     this.setupGround();
     this.setupPostProcessing(width, height);
+
+    const saved = readSavedQuality();
+    if (saved) {
+      this.manualQualityOverride = true;
+      this.setLowQuality(saved === 'low', false);
+    } else {
+      this.setLowQuality(detectLowEndDevice(), false);
+    }
+
     window.addEventListener('resize', this.handleResize);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
+  private getTargetPixelRatio(low: boolean): number {
+    if (low) return 1;
+    const cap = isTouchDevice() ? 1.5 : 2;
+    return Math.min(window.devicePixelRatio || 1, cap);
   }
 
   private setupPostProcessing(width: number, height: number): void {
@@ -87,10 +141,44 @@ export class Engine {
     this.composer.addPass(new OutputPass());
   }
 
-  setLowQuality(low: boolean): void {
+  isLowQuality(): boolean {
+    return this.lowQuality;
+  }
+
+  setLowQuality(low: boolean, persist = true): void {
     this.lowQuality = low;
-    this.renderer.setPixelRatio(low ? 1 : Math.min(window.devicePixelRatio, 2));
+    if (persist) {
+      this.manualQualityOverride = true;
+      writeSavedQuality(low);
+    }
+
+    const width = this.container.clientWidth || window.innerWidth;
+    const height = this.container.clientHeight || window.innerHeight;
+    const dpr = this.getTargetPixelRatio(low);
+
+    this.renderer.setPixelRatio(dpr);
+    this.renderer.setSize(width, height);
+    if (this.composer) {
+      this.composer.setPixelRatio(dpr);
+      this.composer.setSize(width, height);
+    }
+
     this.renderer.shadowMap.enabled = !low;
+    this.renderer.shadowMap.needsUpdate = true;
+
+    this.scene.traverse((obj) => {
+      if (obj instanceof THREE.DirectionalLight) {
+        obj.castShadow = !low;
+      }
+      if (obj instanceof THREE.Mesh) {
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        for (const m of mats) {
+          if (m) m.needsUpdate = true;
+        }
+      }
+    });
+
+    this.bus.emit('engine:qualityChanged', { low });
   }
 
   private setupGround(): void {
@@ -118,8 +206,15 @@ export class Engine {
   }
 
   start(): void {
-    if (this.rafId !== null) return;
+    this.running = true;
+    this.bus.emit('engine:qualityChanged', { low: this.lowQuality });
+    if (this.rafId !== null || document.hidden) return;
     this.clock.start();
+    this.clock.getDelta();
+    this.scheduleLoop();
+  }
+
+  private scheduleLoop(): void {
     const tick = (): void => {
       this.rafId = requestAnimationFrame(tick);
       const dt = Math.min(this.clock.getDelta(), 0.1);
@@ -127,6 +222,13 @@ export class Engine {
 
       for (const cb of this.updateCallbacks) {
         cb(dt, elapsed);
+      }
+
+      // Distance-based CSS2D label culling on scene roots
+      for (const child of this.scene.children) {
+        if (typeof child.userData?.updateLabels === 'function') {
+          child.userData.updateLabels(this.camera.position);
+        }
       }
 
       if (!this.lowQuality && this.composer) {
@@ -138,6 +240,18 @@ export class Engine {
 
       this.frameCount += 1;
       this.fpsAccumTime += dt;
+      if (!this.startupChecked && !this.lowQuality && !this.manualQualityOverride) {
+        this.startupTime += dt;
+        this.startupFrames += 1;
+        if (this.startupTime >= 2.0) {
+          this.startupChecked = true;
+          const avgFps = this.startupFrames / this.startupTime;
+          if (avgFps < 30) {
+            this.setLowQuality(true, false);
+          }
+        }
+      }
+
       if (this.fpsAccumTime >= 0.25) {
         const fps = Math.round(this.frameCount / this.fpsAccumTime);
         const frameTimeMs = Number(((this.fpsAccumTime / this.frameCount) * 1000).toFixed(1));
@@ -155,25 +269,44 @@ export class Engine {
   }
 
   stop(): void {
+    this.running = false;
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
   }
 
+  private handleVisibilityChange = (): void => {
+    if (document.hidden) {
+      if (this.rafId !== null) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+      }
+    } else if (this.running && this.rafId === null) {
+      this.clock.getDelta();
+      this.scheduleLoop();
+    }
+  };
+
   private handleResize = (): void => {
     const width = this.container.clientWidth || window.innerWidth;
     const height = this.container.clientHeight || window.innerHeight;
+    const dpr = this.getTargetPixelRatio(this.lowQuality);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(width, height);
-    this.composer?.setSize(width, height);
+    if (this.composer) {
+      this.composer.setPixelRatio(dpr);
+      this.composer.setSize(width, height);
+    }
     this.labelRenderer.setSize(width, height);
   };
 
   dispose(): void {
     this.stop();
     window.removeEventListener('resize', this.handleResize);
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.renderer.dispose();
   }
 }

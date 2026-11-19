@@ -351,12 +351,18 @@ export class Hud {
     });
 
     const qualBtn = this.root.querySelector('#btn-quality') as HTMLButtonElement;
+    const syncQualityBtn = (low: boolean): void => {
+      this.lowQuality = low;
+      if (!qualBtn) return;
+      qualBtn.textContent = t(this.lang, low ? 'qualityLow' : 'qualityHigh');
+      qualBtn.classList.toggle('active', low);
+    };
     qualBtn?.addEventListener('click', () => {
-      this.lowQuality = !this.lowQuality;
-      qualBtn.textContent = t(this.lang, this.lowQuality ? 'qualityLow' : 'qualityHigh');
-      qualBtn.classList.toggle('active', this.lowQuality);
-      this.bus.emit('ui:quality', { low: this.lowQuality });
+      const next = !this.lowQuality;
+      syncQualityBtn(next);
+      this.bus.emit('ui:quality', { low: next });
     });
+    this.bus.on('engine:qualityChanged', ({ low }) => syncQualityBtn(low));
 
     const hcBtn = this.root.querySelector('#btn-contrast') as HTMLButtonElement;
     hcBtn?.addEventListener('click', () => {

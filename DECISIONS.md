@@ -49,6 +49,13 @@
 - Click-to-walk now routes between rooms via BFS door waypoints (`computeDoorPath`) instead of walking straight into walls.
 - Added pure-logic unit tests in `tests/walk-collision.test.ts` runnable directly with Node v26 `node --test` (keeping `package.json` untouched until Step 5).
 
+## Step 4: Performance & Quality Settings
+- Auto-detects Low quality on touch/small/low-RAM/low-core devices or when the first 2 seconds average `< 30 fps`; persists manual user choice in `localStorage` (`vh3d.quality`, wrapped in `try/catch`).
+- Reuses a single `EffectComposer` and refreshes `composer.setPixelRatio`/`setSize`, `renderer.shadowMap.needsUpdate`, `DirectionalLight.castShadow`, and `material.needsUpdate` on toggle without leaking GPU resources.
+- Hooked `BuildingBuilder`'s distance-based CSS2D label culling via `root.userData.updateLabels(camPos)` invoked by `Engine` so `src/main.ts` remains untouched.
+- Pauses `requestAnimationFrame` on `document.visibilitychange` when hidden and caps touch DPR at `1.5`.
+
+
 
 
 
