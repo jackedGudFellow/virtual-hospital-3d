@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { FloorWalkData } from './HospitalIndex';
+import { computeDoorPath, FloorWalkData, resolveCircleMovement } from './HospitalIndex';
 
 interface TweenWaypoint {
   pos: THREE.Vector3;
@@ -32,7 +32,7 @@ export class CameraRig {
   private tween: ActiveTween | null = null;
   private walkMode = false;
   private floorWalk: FloorWalkData | null = null;
-  private walkTarget: THREE.Vector3 | null = null;
+  private walkWaypoints: Array<{ x: number; z: number }> = [];
   private yaw = 0;
   private pitch = 0;
   private keys = new Set<string>();
@@ -65,8 +65,14 @@ export class CameraRig {
   }
 
   glideWalkTo(x: number, z: number): void {
-    if (!this.walkMode) return;
-    this.walkTarget = new THREE.Vector3(x, (this.floorWalk?.floorY ?? 0) + EYE_HEIGHT, z);
+    if (!this.walkMode || !this.floorWalk) return;
+    this.walkWaypoints = computeDoorPath(
+      this.floorWalk,
+      this.camera.position.x,
+      this.camera.position.z,
+      x,
+      z,
+    );
   }
 
   setWalkInput(x: number, y: number): void {
@@ -154,6 +160,7 @@ export class CameraRig {
   exitWalkMode(): void {
     if (!this.walkMode) return;
     this.walkMode = false;
+    this.walkWaypoints = [];
     this.isLooking = false;
     this.keys.clear();
     this.joystickInput = { x: 0, y: 0 };
@@ -213,7 +220,7 @@ export class CameraRig {
     strafe += this.joystickInput.x;
 
     if (Math.abs(forward) > 0.01 || Math.abs(strafe) > 0.01) {
-      this.walkTarget = null;
+      this.walkWaypoints = [];
       const fwdVec = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
       const rightVec = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
       const move = new THREE.Vector3()
@@ -222,36 +229,27 @@ export class CameraRig {
       if (move.lengthSq() > 1) move.normalize();
       move.multiplyScalar(WALK_SPEED * dt);
 
-      const curX = this.camera.position.x;
-      const curZ = this.camera.position.z;
-      if (this.canWalkTo(curX, curZ, curX + move.x, curZ)) {
-        this.camera.position.x += move.x;
-      }
-      if (this.canWalkTo(this.camera.position.x, curZ, this.camera.position.x, curZ + move.z)) {
-        this.camera.position.z += move.z;
-      }
-    } else if (this.walkTarget) {
-      const dx = this.walkTarget.x - this.camera.position.x;
-      const dz = this.walkTarget.z - this.camera.position.z;
+      const resolved = this.resolveStep(this.camera.position.x + move.x, this.camera.position.z + move.z);
+      this.camera.position.x = resolved.x;
+      this.camera.position.z = resolved.z;
+    } else if (this.walkWaypoints.length > 0) {
+      const wp = this.walkWaypoints[0];
+      const dx = wp.x - this.camera.position.x;
+      const dz = wp.z - this.camera.position.z;
       const dist = Math.hypot(dx, dz);
-      if (dist < 0.15) {
-        this.walkTarget = null;
+      if (dist < 0.22) {
+        this.walkWaypoints.shift();
       } else {
         const step = Math.min(dist, WALK_SPEED * 1.15 * dt);
-        const mx = (dx / dist) * step;
-        const mz = (dz / dist) * step;
         const curX = this.camera.position.x;
         const curZ = this.camera.position.z;
-        let moved = false;
-        if (this.canWalkTo(curX, curZ, curX + mx, curZ)) {
-          this.camera.position.x += mx;
-          moved = true;
+        const resolved = this.resolveStep(curX + (dx / dist) * step, curZ + (dz / dist) * step);
+        const movedDist = Math.hypot(resolved.x - curX, resolved.z - curZ);
+        this.camera.position.x = resolved.x;
+        this.camera.position.z = resolved.z;
+        if (movedDist < 0.005) {
+          this.walkWaypoints = [];
         }
-        if (this.canWalkTo(this.camera.position.x, curZ, this.camera.position.x, curZ + mz)) {
-          this.camera.position.z += mz;
-          moved = true;
-        }
-        if (!moved) this.walkTarget = null;
       }
     }
 
@@ -260,29 +258,17 @@ export class CameraRig {
     }
   }
 
-  private canWalkTo(fromX: number, fromZ: number, toX: number, toZ: number): boolean {
-    if (!this.floorWalk) return true;
-    const fromRoom = this.floorWalk.rooms.find(
-      (r) => fromX >= r.minX && fromX <= r.maxX && fromZ >= r.minZ && fromZ <= r.maxZ,
+  private resolveStep(toX: number, toZ: number): { x: number; z: number } {
+    if (!this.floorWalk) return { x: toX, z: toZ };
+    return resolveCircleMovement(
+      this.camera.position.x,
+      this.camera.position.z,
+      toX,
+      toZ,
+      PLAYER_RADIUS,
+      this.floorWalk.walls,
+      this.floorWalk.furniture,
     );
-    const toRoom = this.floorWalk.rooms.find(
-      (r) =>
-        toX >= r.minX + PLAYER_RADIUS * 0.4 &&
-        toX <= r.maxX - PLAYER_RADIUS * 0.4 &&
-        toZ >= r.minZ + PLAYER_RADIUS * 0.4 &&
-        toZ <= r.maxZ - PLAYER_RADIUS * 0.4,
-    );
-
-    // Allow staying inside the same room, or moving between corridors
-    if (toRoom && fromRoom && (toRoom.id === fromRoom.id || (toRoom.isCorridor && fromRoom.isCorridor))) {
-      return true;
-    }
-
-    // Allow crossing between rooms if near a declared doorway
-    const nearDoor = this.floorWalk.doors.some(
-      (d) => Math.hypot(toX - d.x, toZ - d.z) <= d.radius + 0.55,
-    );
-    return nearDoor;
   }
 
   private onKeyDown = (e: KeyboardEvent): void => {

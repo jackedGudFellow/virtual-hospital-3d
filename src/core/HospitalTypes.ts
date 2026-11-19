@@ -69,3 +69,38 @@ export interface RoomTypeSpec {
 }
 
 export type RoomTypesMap = Record<string, RoomTypeSpec>;
+
+export interface WallSegment {
+  x1: number;
+  z1: number;
+  x2: number;
+  z2: number;
+}
+
+export interface CollisionBox {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+}
+
+export interface DoorLink {
+  roomA: string;
+  roomB: string;
+  x: number;
+  z: number;
+}
+
+export interface FloorWalkData {
+  floorY: number;
+  rooms: Array<{
+    id: string;
+    minX: number;
+    maxX: number;
+    minZ: number;
+    maxZ: number;
+  }>;
+  walls: WallSegment[];
+  furniture: CollisionBox[];
+  doorLinks: DoorLink[];
+}
